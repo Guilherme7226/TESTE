@@ -47,7 +47,9 @@ $('closePreview').onclick=()=>$('previewModal').classList.remove('open');
 $('prevPdf').onclick=async()=>{if(previewPage>0){previewPage--;await drawPdfPreview($('previewTitle').textContent)}};
 $('nextPdf').onclick=async()=>{if(previewPage<previewDoc.numPages-1){previewPage++;await drawPdfPreview($('previewTitle').textContent)}};
 document.addEventListener('keydown',e=>{if(!$('previewModal').classList.contains('open'))return;if(e.key==='Escape')$('previewModal').classList.remove('open');if(e.key==='ArrowLeft')$('prevPdf').click();if(e.key==='ArrowRight')$('nextPdf').click()});
-window.addEventListener('dragover',e=>{e.preventDefault();$('siteDrop').classList.add('show')});
-window.addEventListener('dragleave',e=>{if(e.clientX<=0||e.clientY<=0||e.clientX>=innerWidth||e.clientY>=innerHeight)$('siteDrop').classList.remove('show')});
-window.addEventListener('drop',e=>{e.preventDefault();$('siteDrop').classList.remove('show');if(e.dataTransfer.files?.length)add(e.dataTransfer.files)});
+let externalDrag=false;
+window.addEventListener('dragenter',e=>{if(!e.dataTransfer.types.includes('Files'))return;externalDrag=true});
+window.addEventListener('dragover',e=>{if(!externalDrag)return;e.preventDefault()});
+window.addEventListener('drop',e=>{if(!externalDrag)return;externalDrag=false;e.preventDefault();if(e.dataTransfer.files?.length)add(e.dataTransfer.files)});
+window.addEventListener('dragend',()=>{externalDrag=false});
 </script></body></html>
