@@ -28,7 +28,9 @@
 </div>
 </section><div class="note"><b>Privacidade:</b> o PDF não é enviado para servidor. A separação acontece no seu navegador.</div></main>
 <div id="toast" class="toast"></div>
-<script>
+<script type="module">
+import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 const {PDFDocument}=PDFLib;let file=null,pdf=null,total=0;
 const $=id=>document.getElementById(id);
 function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2800)}
