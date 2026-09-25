@@ -136,5 +136,14 @@ out.innerHTML='<div class="track-code">'+esc(raw)+'</div><div class="track-armad
 }
 document.getElementById('trackBtn').onclick=track;document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')track()});
 </script>
-<script>\n(function(){const d=document.getElementById("editDrop"),f=document.getElementById("editFile");if(!d)return;d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.classList.add("over")};d.ondragleave=()=>d.classList.remove("over");d.ondrop=e=>{e.preventDefault();d.classList.remove("over");if(e.dataTransfer.files[0])location.href="./editor.html"};f.onchange=e=>{if(e.target.files[0])location.href="./editor.html"}})();\n</script></body>
+<script>
+(function(){
+const d=document.getElementById("editDrop"),f=document.getElementById("editFile"),s=document.getElementById("editStatus");if(!d)return;
+function db(){return new Promise((res,rej)=>{const q=indexedDB.open("costalog-pdf",1);q.onupgradeneeded=()=>q.result.createObjectStore("files");q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+async function openEditor(file){try{const dbi=await db();const tx=dbi.transaction("files","readwrite");tx.objectStore("files").put(file,"editor");tx.oncomplete=()=>location.href="./editor.html";tx.onerror=()=>{s.textContent="Não foi possível preparar o PDF.";s.className="status error"}}catch(e){s.textContent="Erro ao abrir o editor.";s.className="status error"}}
+d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.classList.add("over")};d.ondragleave=()=>d.classList.remove("over");
+d.ondrop=e=>{e.preventDefault();d.classList.remove("over");if(e.dataTransfer.files[0])openEditor(e.dataTransfer.files[0])};
+f.onchange=e=>{if(e.target.files[0])openEditor(e.target.files[0]);f.value=""};
+})();
+</script></body>
 </html>
