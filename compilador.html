@@ -104,12 +104,25 @@ function atualizar(){
   card.onclick=()=>{p.selected=!p.selected;atualizar()};
   const img=document.createElement('img');img.src=p.dataUrl;img.style.width='100%';img.style.height='185px';img.style.objectFit='contain';img.style.background='#fff';img.style.borderRadius='5px';img.style.transform='rotate('+p.rotation+'deg)';
   const check=document.createElement('div');check.className='check';check.textContent='✓';
+  const zoom=document.createElement('button');zoom.className='zoom';zoom.type='button';zoom.title='Visualizar página';zoom.textContent='🔍';
+  zoom.onclick=async e=>{e.stopPropagation();await abrirPreview(p)};
   const span=document.createElement('span');span.textContent=p.fileName+' • Pág. '+p.pageNumber;
   card.append(img,check,zoom,span);$('grid').appendChild(card);
  });
 }
 
-async function abrirPreview(p){\n const modal=$('zoomModal'),canvas=$('zoomCanvas'),ctx=canvas.getContext('2d');\n try{\n  const pdf=await pdfjsLib.getDocument({data:p.arrayBuffer}).promise;\n  const page=await pdf.getPage(p.pageNumber);\n  const viewport=page.getViewport({scale:1.5,rotation:p.rotation});\n  canvas.width=viewport.width;canvas.height=viewport.height;\n  await page.render({canvasContext:ctx,viewport}).promise;\n  $('zoomTitle').textContent=p.fileName+' • Página '+p.pageNumber;\n  modal.classList.add('show');\n }catch(err){console.error(err);alert('Não foi possível abrir a pré-visualização.')}\n}\n\nfunction fecharPreview(){$('zoomModal').classList.remove('show')}\n\nnew Sortable($('grid'),{animation:150,onEnd:()=>{
+async function abrirPreview(p){
+ const modal=$('zoomModal'),canvas=$('zoomCanvas'),ctx=canvas.getContext('2d');
+ try{
+  const pdf=await pdfjsLib.getDocument({data:p.arrayBuffer}).promise;
+  const page=await pdf.getPage(p.pageNumber);
+  const viewport=page.getViewport({scale:1.5,rotation:p.rotation});
+  canvas.width=viewport.width;canvas.height=viewport.height;
+  await page.render({canvasContext:ctx,viewport}).promise;
+  $('zoomTitle').textContent=p.fileName+' • Página '+p.pageNumber;
+  modal.classList.add('show');
+ }catch(err){console.error(err);alert('Não foi possível abrir a pré-visualização.')}
+}\n\nfunction fecharPreview(){$('zoomModal').classList.remove('show')}\n\nnew Sortable($('grid'),{animation:150,onEnd:()=>{
  const ordem=[];
  document.querySelectorAll('.page').forEach(card=>{const p=paginas.find(x=>x.id===card.dataset.id);if(p)ordem.push(p)});
  paginas=ordem;atualizar();
