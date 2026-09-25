@@ -1,1 +1,175 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Editor de PDF | COSTALOG</title><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><style>:root{--bg:#f1f1f1;--card:#fff;--text:#111;--muted:#666;--line:#d7d7d7;--red:#d71920}html.dark{--bg:#0a0a0a;--card:#151515;--text:#fff;--muted:#aaa;--line:#333}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.top{height:64px;background:var(--card);border-bottom:2px solid var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 20px}.brand{font-weight:950;text-decoration:none;color:var(--text)}.brand span{color:var(--red)}.actions{display:flex;gap:8px}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:7px;padding:9px 13px;font-weight:800;cursor:pointer}.primary{background:var(--red);border-color:var(--red);color:#fff}.workspace{display:grid;grid-template-columns:240px 1fr 250px;height:calc(100vh - 64px)}.side{background:var(--card);border-right:1px solid var(--line);padding:15px;overflow:auto}.right{border-left:1px solid var(--line);border-right:0}.side h3{font-size:13px;margin:4px 0 12px;text-transform:uppercase}.drop{border:2px dashed #aaa;border-radius:12px;padding:25px 10px;text-align:center;cursor:pointer;background:var(--bg)}input[type=file]{display:none}.thumb{margin-top:12px;border:2px solid transparent;border-radius:8px;overflow:hidden;cursor:pointer;background:var(--bg)}.thumb.active{border-color:var(--red)}.thumb canvas{width:100%;display:block}.thumb small{display:block;padding:5px;text-align:center;color:var(--muted)}.canvas-area{overflow:auto;padding:35px;display:flex;justify-content:center;align-items:flex-start}.page{position:relative;background:#fff;box-shadow:0 10px 35px #0003}.page canvas{display:block}.overlay{position:absolute;min-width:40px;min-height:24px;padding:2px 4px;border:1px dashed transparent;cursor:move;white-space:pre;user-select:none;color:#111}.overlay.selected{border-color:var(--red)}.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.field{width:70px;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--text)}.textedit{width:100%;min-height:100px;resize:vertical;padding:9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--text);font:inherit}.help{font-size:12px;color:var(--muted);line-height:1.5}@media(max-width:900px){.workspace{grid-template-columns:1fr}.side{display:none}.right{display:block;position:fixed;bottom:0;left:0;right:0;height:auto;max-height:45vh;z-index:4;box-shadow:0 -5px 20px #0002}.canvas-area{padding:20px 10px 220px}.top{padding:0 10px}}</style></head><body><header class="top"><a class="brand" href="./">COSTALOG <span>PDF</span> • Editor</a><div class="actions"><button class="btn" id="theme">🌙</button><button class="btn" onclick="location.href='./'">← Início</button><button class="btn primary" id="save">💾 Baixar PDF</button></div></header><div class="workspace"><aside class="side"><h3>Documento</h3><label class="drop" id="drop"><strong>📄 Arraste o PDF</strong><small>ou clique para abrir</small><input id="file" type="file" accept="application/pdf"></label><div id="thumbs"></div></aside><main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong>Arraste um PDF para começar.</div><div id="page" class="page" style="display:none"></div></main><aside class="side right"><h3>Editar texto</h3><div class="toolbar"><button class="btn" id="add">＋ Texto</button><button class="btn" id="del">🗑 Excluir</button><button class="btn" id="bold"><b>B</b></button></div><textarea id="text" class="textedit" placeholder="Selecione um texto adicionado"></textarea><p class="help">Tamanho <input class="field" id="size" type="number" min="6" max="96" value="16"> px</p><p class="help">Arraste os textos para posicioná-los. O PDF original é preservado; os textos adicionados são incorporados ao arquivo baixado.</p></aside></div><script type="module">import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';const {PDFDocument,rgb,StandardFonts}=PDFLib;let sourceBytes=null,pdf=null,pageNum=1,scale=1.25,selected=null,items=[];const $=id=>document.getElementById(id);(function(){const k='costalog-theme',r=document.documentElement,b=$('theme');const a=d=>{r.classList.toggle('dark',d);localStorage.setItem(k,d?'dark':'light');b.textContent=d?'☀️':'🌙'};a(localStorage.getItem(k)==='dark');b.onclick=()=>a(!r.classList.contains('dark'))})();function wire(){const d=$('drop'),f=$('file');d.onclick=()=>f.click();d.ondragover=e=>e.preventDefault();d.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])openFile(e.dataTransfer.files[0])};f.onchange=e=>{if(e.target.files[0])openFile(e.target.files[0])}}async function openFile(file){if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))return alert('Escolha um PDF.');sourceBytes=new Uint8Array(await file.arrayBuffer());pdf=await pdfjsLib.getDocument({data:sourceBytes.slice()}).promise;items=[];selected=null;$('empty').style.display='none';$('page').style.display='block';await thumbs();await render(1)}async function thumbs(){const t=$('thumbs');t.innerHTML='';for(let i=1;i<=pdf.numPages;i++){const w=document.createElement('div');w.className='thumb'+(i===1?' active':'');const c=document.createElement('canvas');w.append(c);const s=document.createElement('small');s.textContent='Página '+i;w.append(s);w.onclick=()=>render(i);t.append(w);const p=await pdf.getPage(i),v=p.getViewport({scale:.22});c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise}}async function render(n){pageNum=n;document.querySelectorAll('.thumb').forEach((x,i)=>x.classList.toggle('active',i===n-1));const p=await pdf.getPage(n),v=p.getViewport({scale});const el=$('page');el.innerHTML='';const c=document.createElement('canvas');c.width=v.width;c.height=v.height;el.style.width=v.width+'px';el.style.height=v.height+'px';el.append(c);await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;items.filter(x=>x.page===n).forEach(addOverlay)}function addOverlay(o){const e=document.createElement('div');e.className='overlay'+(selected===o?' selected':'');e.textContent=o.text;e.style.left=o.x+'px';e.style.top=o.y+'px';e.style.fontSize=o.size+'px';e.style.fontWeight=o.bold?'800':'400';e.onclick=x=>{x.stopPropagation();select(o)};e.onpointerdown=x=>drag(x,o,e);$('page').append(e)}function select(o){selected=o;$('text').value=o.text;$('size').value=o.size;render(pageNum)}function drag(e,o,el){e.preventDefault();const sx=e.clientX,sy=e.clientY,ox=o.x,oy=o.y,move=x=>{o.x=Math.max(0,ox+x.clientX-sx);o.y=Math.max(0,oy+x.clientY-sy);el.style.left=o.x+'px';el.style.top=o.y+'px'},up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up)};addEventListener('pointermove',move);addEventListener('pointerup',up)}$('add').onclick=()=>{if(!pdf)return;const o={page:pageNum,x:45,y:45,text:'Novo texto',size:16,bold:false};items.push(o);selected=o;render(pageNum);$('text').focus();$('text').select()};$('del').onclick=()=>{if(!selected)return;items=items.filter(x=>x!==selected);selected=null;$('text').value='';render(pageNum)};$('text').oninput=e=>{if(selected){selected.text=e.target.value;render(pageNum)}};$('size').oninput=e=>{if(selected){selected.size=Number(e.target.value)||16;render(pageNum)}};$('bold').onclick=()=>{if(selected){selected.bold=!selected.bold;render(pageNum)}};$('save').onclick=async()=>{if(!pdf)return alert('Abra um PDF primeiro.');const out=await PDFDocument.load(sourceBytes),f=await out.embedFont(StandardFonts.Helvetica),fb=await out.embedFont(StandardFonts.HelveticaBold),pw=$('page').clientWidth;for(const o of items){const p=out.getPage(o.page-1),sx=p.getWidth()/pw,sy=p.getHeight()/$('page').clientHeight;String(o.text).split('\n').forEach((line,i)=>p.drawText(line,{x:o.x*sx,y:p.getHeight()-(o.y+i*o.size*1.2)*sy-o.size*sy,size:o.size*sx,font:o.bold?fb:f,color:rgb(0,0,0)}))}const bytes=await out.save(),u=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=u;a.download='COSTALOG-PDF-editado.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};wire();</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor de PDF | COSTALOG</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<style>
+:root{--bg:#eee;--card:#fff;--surface:#f6f6f6;--text:#111;--muted:#666;--line:#d5d5d5;--red:#d71920;--blue:#2563eb}
+html.dark{--bg:#090909;--card:#151515;--surface:#101010;--text:#fff;--muted:#aaa;--line:#333}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.top{height:60px;background:var(--card);border-bottom:2px solid var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:10px}.brand{font-weight:950;text-decoration:none;color:var(--text);white-space:nowrap}.brand span{color:var(--red)}.actions,.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:7px;padding:8px 10px;font-weight:800;cursor:pointer}.btn:hover{border-color:var(--red)}.primary{background:var(--red);border-color:var(--red);color:#fff}.tool.active{background:var(--red);border-color:var(--red);color:#fff}.workspace{display:grid;grid-template-columns:210px 1fr 255px;height:calc(100vh - 60px)}.side{background:var(--card);border-right:1px solid var(--line);padding:12px;overflow:auto}.right{border-left:1px solid var(--line);border-right:0}.side h3{font-size:12px;margin:3px 0 10px;text-transform:uppercase}.drop{border:2px dashed #aaa;border-radius:10px;padding:18px 8px;text-align:center;cursor:pointer;background:var(--surface)}.drop small{display:block;color:var(--muted);margin-top:4px}.drop input{display:none}.thumb{margin-top:10px;border:2px solid transparent;border-radius:7px;overflow:hidden;cursor:pointer;background:var(--surface)}.thumb.active{border-color:var(--red)}.thumb canvas{width:100%;display:block}.thumb small{display:block;padding:4px;text-align:center;color:var(--muted)}.canvas-area{overflow:auto;padding:28px;display:flex;justify-content:center;align-items:flex-start}.page{position:relative;background:#fff;box-shadow:0 10px 35px #0004;flex:none}.page>canvas{display:block}.layer{position:absolute;inset:0;overflow:hidden}.obj{position:absolute;cursor:move;user-select:none}.obj.selected{outline:2px solid var(--red);outline-offset:1px}.text-obj{padding:1px 3px;white-space:pre-wrap;line-height:1.15;color:#111}.existing{border:1px dashed transparent}.existing:hover{border-color:#999}.existing.editing{background:#fff;border:2px solid var(--red)}.shape{pointer-events:auto}.img-obj{max-width:none}.field-obj{border:1px solid #2563eb;background:#2563eb18;color:#111;padding:4px 6px;min-width:120px;min-height:28px}.check-obj{width:24px;height:24px;border:2px solid #2563eb;background:#fff;font-size:18px;text-align:center;line-height:19px}.right .section{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px}.label{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase}.textedit{width:100%;min-height:86px;resize:vertical;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text);font:inherit}.row{display:flex;gap:6px;align-items:center;margin-top:7px}.input{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text)}.help{font-size:11px;color:var(--muted);line-height:1.45}.status{font-size:11px;color:var(--muted);min-height:18px}.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:20}.modal.show{display:flex}.modal-card{width:min(560px,94vw);background:var(--card);border-radius:12px;padding:14px;box-shadow:0 20px 60px #0008}.sigcanvas{width:100%;height:220px;background:#fff;border:1px solid var(--line);touch-action:none}.modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}@media(max-width:1050px){.workspace{grid-template-columns:180px 1fr}.right{position:fixed;right:0;top:60px;bottom:0;width:285px;z-index:8;box-shadow:-8px 0 25px #0002}}@media(max-width:760px){.workspace{display:block}.side:first-child{display:none}.right{left:0;right:0;top:auto;width:auto;height:auto;max-height:42vh;border-left:0;border-top:1px solid var(--line)}.canvas-area{padding:15px 10px 260px}.tools{max-width:62vw;overflow:auto;flex-wrap:nowrap}.top{height:auto;min-height:60px}.brand{font-size:13px}.btn{padding:7px 8px}}
+</style>
+</head>
+<body>
+<header class="top">
+<a class="brand" href="./">COSTALOG <span>PDF</span> • Editor</a>
+<div class="tools" id="toolbar">
+<button class="btn" data-tool="select">↖ Selecionar</button>
+<button class="btn" data-tool="text">T Texto</button>
+<button class="btn" data-tool="highlight">🖍 Destaque</button>
+<button class="btn" data-tool="rect">□ Retângulo</button>
+<button class="btn" data-tool="line">╱ Linha</button>
+<button class="btn" data-tool="arrow">➜ Seta</button>
+<button class="btn" data-tool="draw">✎ Desenho</button>
+<button class="btn" id="imageBtn">🖼 Imagem</button>
+<button class="btn" id="signatureBtn">✍ Assinatura</button>
+<button class="btn" data-tool="field">▤ Campo</button>
+<button class="btn" data-tool="check">☑ Caixa</button>
+<input id="imageFile" type="file" accept="image/png,image/jpeg" hidden>
+</div>
+<div class="actions"><button class="btn" id="theme">🌙</button><button class="btn" onclick="location.href='./'">← Início</button><button class="btn primary" id="save">💾 Baixar PDF</button></div>
+</header>
+
+<div class="workspace">
+<aside class="side">
+<h3>Documento</h3>
+<label class="drop" id="drop"><strong>📄 Arraste o PDF</strong><small>ou clique para abrir</small><input id="file" type="file" accept="application/pdf"></label>
+<div id="status" class="status"></div><div id="thumbs"></div>
+</aside>
+<main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong>Abra ou arraste um PDF para começar.</div><div id="page" class="page" style="display:none"><div id="layer" class="layer"></div></div></main>
+<aside class="side right">
+<div class="section"><h3>Propriedades</h3><div class="label">Texto selecionado</div><textarea id="text" class="textedit" placeholder="Clique em um texto existente ou adicionado."></textarea><div class="row"><input id="size" class="input" type="number" min="6" max="96" value="16" title="Tamanho"><button class="btn" id="bold"><b>B</b></button><button class="btn" id="del">🗑 Apagar</button></div></div>
+<div class="section"><h3>Inserir</h3><div class="row"><button class="btn" id="addText">＋ Texto</button><button class="btn" id="addField">▤ Campo</button><button class="btn" id="addCheck">☑ Checkbox</button></div><p class="help">Para texto existente, clique diretamente sobre a palavra/bloco. O editor permite substituir ou cobrir o conteúdo no PDF exportado.</p></div>
+<div class="section"><h3>Como usar</h3><p class="help">Selecione objetos e arraste. Use Destaque, Retângulo, Linha, Seta ou Desenho para marcações. Imagens e assinaturas podem ser posicionadas e redimensionadas visualmente. Campos são incorporados ao PDF como campos preenchíveis visuais.</p></div>
+</aside>
+</div>
+
+<div class="modal" id="sigModal"><div class="modal-card"><h3 style="margin:4px 0 10px">Assinatura</h3><canvas id="sigCanvas" class="sigcanvas"></canvas><div class="modal-actions"><button class="btn" id="sigClear">Limpar</button><button class="btn" id="sigCancel">Cancelar</button><button class="btn primary" id="sigUse">Usar assinatura</button></div></div></div>
+
+<script type="module">
+import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+const {PDFDocument,rgb,StandardFonts,degrees}=PDFLib;
+const $=id=>document.getElementById(id);
+let sourceBytes=null,pdf=null,pageNum=1,scale=1.25,tool='select',selected=null,objects=[],existing=[],dragState=null,drawing=null;
+
+(function(){const k='costalog-theme',r=document.documentElement,b=$('theme');const a=d=>{r.classList.toggle('dark',d);localStorage.setItem(k,d?'dark':'light');b.textContent=d?'☀️':'🌙'};a(localStorage.getItem(k)==='dark');b.onclick=()=>a(!r.classList.contains('dark'))})();
+
+function db(){return new Promise((res,rej)=>{const q=indexedDB.open('costalog-pdf',1);q.onupgradeneeded=()=>q.result.createObjectStore('files');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
+async function getPending(){try{const d=await db();return await new Promise((res,rej)=>{const t=d.transaction('files','readonly');const q=t.objectStore('files').get('editor');q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}catch{return null}}
+async function clearPending(){try{const d=await db();const t=d.transaction('files','readwrite');t.objectStore('files').delete('editor')}catch{}}
+
+function wire(){
+ const d=$('drop'),f=$('file');
+ d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.style.borderColor='var(--red)'};d.ondragleave=()=>d.style.borderColor='';
+ d.ondrop=e=>{e.preventDefault();d.style.borderColor='';if(e.dataTransfer.files[0])openFile(e.dataTransfer.files[0])};
+ f.onchange=e=>{if(e.target.files[0])openFile(e.target.files[0])};
+ document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+ $('addText').onclick=()=>addText();
+ $('addField').onclick=()=>addField();
+ $('addCheck').onclick=()=>addCheck();
+ $('del').onclick=deleteSelected;
+ $('bold').onclick=()=>{if(selected&&selected.kind==='text'){selected.bold=!selected.bold;render(pageNum)}};
+ $('text').oninput=e=>{if(selected&&selected.kind==='text'){selected.text=e.target.value;render(pageNum)}};
+ $('size').oninput=e=>{if(selected&&selected.kind==='text'){selected.size=Number(e.target.value)||16;render(pageNum)}};
+ $('imageBtn').onclick=()=>$('imageFile').click();
+ $('imageFile').onchange=e=>{if(e.target.files[0])addImage(e.target.files[0]);e.target.value=''};
+ $('signatureBtn').onclick=openSignature;
+ $('save').onclick=savePDF;
+}
+function setTool(t){tool=t;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));$('status').textContent=t==='select'?'Clique em qualquer texto/objeto para selecionar.':'Ferramenta: '+t+'. Clique e arraste na página.'}
+async function openFile(file){
+ if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))return alert('Escolha um PDF.');
+ sourceBytes=new Uint8Array(await file.arrayBuffer());pdf=await pdfjsLib.getDocument({data:sourceBytes.slice()}).promise;objects=[];existing=[];selected=null;
+ $('empty').style.display='none';$('page').style.display='block';$('status').textContent='Lendo textos do PDF...';await thumbs();await extractExisting();await render(1);$('status').textContent='PDF aberto. Clique em um texto existente para editar.';
+}
+async function thumbs(){const t=$('thumbs');t.innerHTML='';for(let i=1;i<=pdf.numPages;i++){const w=document.createElement('div');w.className='thumb'+(i===1?' active':'');const c=document.createElement('canvas');w.append(c);const s=document.createElement('small');s.textContent='Página '+i;w.append(s);w.onclick=()=>render(i);t.append(w);const p=await pdf.getPage(i),v=p.getViewport({scale:.22});c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise}}
+async function extractExisting(){
+ existing=[];for(let n=1;n<=pdf.numPages;n++){const p=await pdf.getPage(n),tc=await p.getTextContent(),vp=p.getViewport({scale:1});for(const item of tc.items){if(!item.str||!item.str.trim())continue;const tr=item.transform,x=tr[4],h=Math.max(6,Math.sqrt(tr[2]*tr[2]+tr[3]*tr[3])),y=vp.height-tr[5]-h,w=Math.max(4,item.width);existing.push({kind:'existing',page:n,x,y,w,h,text:item.str,size:h,bold:false,originalX:x,originalY:tr[5],originalW:w,originalH:h,changed:false})}}
+}
+function pageDims(){return {w:$('page').clientWidth,h:$('page').clientHeight}}
+async function render(n){
+ pageNum=n;document.querySelectorAll('.thumb').forEach((x,i)=>x.classList.toggle('active',i===n-1));
+ const p=await pdf.getPage(n),v=p.getViewport({scale});const el=$('page');el.innerHTML='<canvas></canvas><div id="layer" class="layer"></div>';const c=el.querySelector('canvas');c.width=v.width;c.height=v.height;el.style.width=v.width+'px';el.style.height=v.height+'px';await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;
+ const layer=$('layer');existing.filter(o=>o.page===n).forEach(o=>drawExisting(layer,o));objects.filter(o=>o.page===n).forEach(o=>drawObject(layer,o));
+ layer.onpointerdown=e=>{if(e.target!==layer)return;if(tool==='draw'){startDraw(e)}else if(tool==='text'||tool==='field'||tool==='check'||['highlight','rect','line','arrow'].includes(tool)){startShape(e)}else{selected=null;updatePanel()}};
+}
+function drawExisting(layer,o){
+ const e=document.createElement('div');e.className='obj text-obj existing'+(selected===o?' editing':'');e.textContent=o.text;e.style.left=o.x*scale+'px';e.style.top=o.y*scale+'px';e.style.width=Math.max(o.w*scale,20)+'px';e.style.minHeight=Math.max(o.h*scale,10)+'px';e.style.fontSize=o.size*scale+'px';e.style.fontWeight=o.bold?'700':'400';e.onclick=ev=>{ev.stopPropagation();select(o)};e.onpointerdown=ev=>{ev.stopPropagation();if(tool==='select')drag(ev,o,e);};layer.append(e)
+}
+function drawObject(layer,o){
+ const e=document.createElement('div');e.className='obj '+(selected===o?'selected':'');e.style.left=o.x*scale+'px';e.style.top=o.y*scale+'px';if(o.w)e.style.width=o.w*scale+'px';if(o.h)e.style.height=o.h*scale+'px';
+ if(o.kind==='text'){e.className+=' text-obj';e.textContent=o.text;e.style.fontSize=o.size*scale+'px';e.style.fontWeight=o.bold?'700':'400'}
+ if(o.kind==='image'||o.kind==='signature'){e.innerHTML='<img src="'+o.src+'" style="display:block;width:100%;height:100%;object-fit:contain">';e.style.width=(o.w||180)*scale+'px';e.style.height=(o.h||100)*scale+'px'}
+ if(o.kind==='highlight'){e.style.background='rgba(255,230,0,.42)';e.style.pointerEvents='none'}
+ if(o.kind==='rect'){e.style.border='2px solid #d71920';e.style.background='transparent'}
+ if(o.kind==='line'||o.kind==='arrow'){e.style.pointerEvents='none';e.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" stroke="#d71920" stroke-width="3" '+(o.kind==='arrow'?'marker-end="url(#a)"':'')+'/><defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#d71920"/></marker></defs></svg>'}
+ if(o.kind==='draw'){e.style.pointerEvents='none';e.innerHTML='<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="'+o.points.map(p=>(p.x/o.w*100)+','+(p.y/o.h*100)).join(' ')+'" fill="none" stroke="#d71920" stroke-width="3"/></svg>'}
+ if(o.kind==='field'){e.className+=' field-obj';e.textContent=o.value||o.label||'Campo de formulário';e.style.fontSize=12*scale+'px'}
+ if(o.kind==='check'){e.className+=' check-obj';e.textContent=o.checked?'✓':''}
+ e.onclick=ev=>{ev.stopPropagation();select(o)};e.onpointerdown=ev=>{ev.stopPropagation();if(tool==='select')drag(ev,o,e)};layer.append(e)
+}
+function select(o){selected=o;$('text').value=o.kind==='text'||o.kind==='existing'?o.text:'';$('size').value=o.size||16;render(pageNum)}
+function updatePanel(){$('text').value='';$('size').value=16}
+function drag(ev,o,el){ev.preventDefault();selected=o;const sx=ev.clientX,sy=ev.clientY,ox=o.x,oy=o.y;const move=x=>{o.x=Math.max(0,ox+(x.clientX-sx)/scale);o.y=Math.max(0,oy+(x.clientY-sy)/scale);el.style.left=o.x*scale+'px';el.style.top=o.y*scale+'px'};const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);};addEventListener('pointermove',move);addEventListener('pointerup',up);updatePanel()}
+function pos(ev){const r=$('layer').getBoundingClientRect();return{x:Math.max(0,(ev.clientX-r.left)/scale),y:Math.max(0,(ev.clientY-r.top)/scale)}}
+function addText(){if(!pdf)return alert('Abra um PDF primeiro.');const p=pageDims();const o={kind:'text',page:pageNum,x:40,y:40,text:'Novo texto',size:16,bold:false,w:140,h:25};objects.push(o);selected=o;render(pageNum)}
+function addField(){const o={kind:'field',page:pageNum,x:45,y:45,w:170,h:30,label:'Campo de formulário',value:''};objects.push(o);selected=o;render(pageNum)}
+function addCheck(){const o={kind:'check',page:pageNum,x:45,y:45,w:24,h:24,checked:false};objects.push(o);selected=o;render(pageNum)}
+function startShape(ev){
+ const s=pos(ev),layer=$('layer');if(tool==='text'){const o={kind:'text',page:pageNum,x:s.x,y:s.y,text:'Novo texto',size:16,bold:false,w:140,h:25};objects.push(o);selected=o;render(pageNum);return}
+ if(tool==='field'||tool==='check'){tool==='field'?addField():addCheck();const o=objects[objects.length-1];o.x=s.x;o.y=s.y;render(pageNum);return}
+ const o={kind:tool,page:pageNum,x:s.x,y:s.y,w:2,h:2};objects.push(o);selected=o;const move=x=>{const q=pos(x);o.w=q.x-s.x;o.h=q.y-s.y;o.x=Math.min(s.x,q.x);o.y=Math.min(s.y,q.y);render(pageNum)};const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);};addEventListener('pointermove',move);addEventListener('pointerup',up)
+}
+function startDraw(ev){
+ const s=pos(ev),o={kind:'draw',page:pageNum,x:s.x,y:s.y,w:1,h:1,points:[{x:0,y:0}]};objects.push(o);selected=o;const move=x=>{const q=pos(x);o.w=Math.max(o.w,q.x-s.x);o.h=Math.max(o.h,q.y-s.y);o.points.push({x:q.x-s.x,y:q.y-s.y});render(pageNum)};const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up)};addEventListener('pointermove',move);addEventListener('pointerup',up)
+}
+async function addImage(file){if(!pdf)return alert('Abra um PDF primeiro.');const src=await dataURL(file);const img=new Image();img.onload=()=>{const w=180,h=img.height/img.width*w;const o={kind:'image',page:pageNum,x:40,y:40,w,h,src};objects.push(o);selected=o;render(pageNum)};img.src=src}
+function dataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function deleteSelected(){if(!selected)return; if(selected.kind==='existing'){selected.deleted=true;selected.changed=true}else objects=objects.filter(o=>o!==selected);selected=null;render(pageNum)}
+function editExistingSave(o){o.changed=true}
+$('text').addEventListener('change',()=>{if(selected&&(selected.kind==='existing'||selected.kind==='text')){selected.text=$('text').value;selected.changed=true;render(pageNum)}});
+
+let sigCanvas=$('sigCanvas'),sigCtx=sigCanvas.getContext('2d'),sigDrawing=false;
+function resizeSig(){const d=window.devicePixelRatio||1,r=sigCanvas.getBoundingClientRect();sigCanvas.width=r.width*d;sigCanvas.height=r.height*d;sigCtx.setTransform(d,0,0,d,0,0);sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.strokeStyle='#111'}
+function openSignature(){$('sigModal').classList.add('show');setTimeout(()=>{resizeSig();sigCtx.clearRect(0,0,sigCanvas.clientWidth,sigCanvas.clientHeight)},30)}
+function sigPos(e){const r=sigCanvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+sigCanvas.addEventListener('pointerdown',e=>{sigDrawing=true;const p=sigPos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y)});
+sigCanvas.addEventListener('pointermove',e=>{if(!sigDrawing)return;const p=sigPos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke()});
+addEventListener('pointerup',()=>sigDrawing=false);
+$('sigClear').onclick=()=>sigCtx.clearRect(0,0,sigCanvas.clientWidth,sigCanvas.clientHeight);
+$('sigCancel').onclick=()=>$('sigModal').classList.remove('show');
+$('sigUse').onclick=()=>{const src=sigCanvas.toDataURL('image/png');const o={kind:'signature',page:pageNum,x:45,y:45,w:190,h:70,src};objects.push(o);selected=o;$('sigModal').classList.remove('show');render(pageNum)};
+
+async function savePDF(){
+ if(!pdf)return alert('Abra um PDF primeiro.');
+ $('status').textContent='Gerando PDF...';
+ try{
+  const out=await PDFDocument.load(sourceBytes),font=await out.embedFont(StandardFonts.Helvetica),bold=await out.embedFont(StandardFonts.HelveticaBold);
+  const cache={};
+  for(const o of existing.filter(x=>x.changed||x.deleted)){
+   const p=out.getPage(o.page-1),pw=p.getWidth(),ph=p.getHeight(),x=o.originalX,y=o.originalY-hFrom(o);
+   p.drawRectangle({x:Math.max(0,x-1),y:Math.max(0,y-1),width:o.originalW+3,height:o.originalH+3,color:rgb(1,1,1)});
+   if(!o.deleted&&o.text){p.drawText(o.text,{x:o.originalX,y:o.originalY,size:o.size,font:o.bold?bold:font,color:rgb(0,0,0),maxWidth:o.originalW+30})}
+  }
+  for(const o of objects){
+   const p=out.getPage(o.page-1),pw=p.getWidth(),ph=p.getHeight(),scaleX=pw/$('page').clientWidth,scaleY=ph/$('page').clientHeight;
+   const X=o.x*scaleX,Y=ph-(o.y+o.h)*scaleY,W=Math.abs(o.w*scaleX),H=Math.abs(o.h*scaleY);
+   if(o.kind==='text'){const lines=String(o.text||'').split('\n');lines.forEach((line,i)=>p.drawText(line,{x:X,y:ph-(o.y+(i+1)*o.size)*scaleY,size:o.size*scaleX,font:o.bold?bold:font,color:rgb(0,0,0)}))}
+   if(o.kind==='highlight')p.drawRectangle({x:X,y:Y,width:W,height:H,color:rgb(1,.9,0),opacity:.35});
+   if(o.kind==='rect')p.drawRectangle({x:X,y:Y,width:W,height:H,borderColor:rgb(.84,.1,.12),borderWidth:2});
+   if(o.kind==='line'||o.kind==='arrow'){p.drawLine({start:{x:X,y:Y},end:{x:X+W,y:Y+H},thickness:2,color:rgb(.84,.1,.12)});if(o.kind==='arrow'){p.drawLine({start:{x:X+W,y:Y+H},end:{x:X+W-8*scaleX,y:Y+H+5*scaleY},thickness:2,color:rgb(.84,.1,.12)});p.drawLine({start:{x:X+W,y:Y+H},end:{x:X+W-5*scaleX,y:Y+H+8*scaleY},thickness:2,color:rgb(.84,.1,.12)})}}
+   if(o.kind==='draw'){for(let i=1;i<o.points.length;i++){const a=o.points[i-1],b=o.points[i];p.drawLine({start:{x:X+a.x*scaleX,y:ph-(o.y+a.y)*scaleY},end:{x:X+b.x*scaleX,y:ph-(o.y+b.y)*scaleY},thickness:2,color:rgb(.84,.1,.12)})}}
+   if(o.kind==='image'||o.kind==='signature'){const bytes=await (await fetch(o.src)).arrayBuffer();const emb=/image\/png/.test(o.src)?await out.embedPng(bytes):await out.embedJpg(bytes);p.drawImage(emb,{x:X,y:Y,width:W,height:H})}
+   if(o.kind==='field'){p.drawRectangle({x:X,y:Y,width:W,height:H,borderColor:rgb(.15,.39,.92),borderWidth:1,color:rgb(.95,.97,1)});p.drawText(o.value||o.label||'Campo de formulário',{x:X+4,y:Y+H/2-4,size:9,font,color:rgb(.1,.1,.1)})}
+   if(o.kind==='check'){p.drawRectangle({x:X,y:Y,width:W,height:H,borderColor:rgb(.15,.39,.92),borderWidth:1});if(o.checked)p.drawText('✓',{x:X+3,y:Y+3,size:14,font:renderFont(font),color:rgb(.1,.1,.1)})}
+  }
+  const bytes=await out.save(),u=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=u;a.download='COSTALOG-PDF-editado.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);$('status').textContent='✓ PDF gerado com as edições.'; 
+ }catch(e){console.error(e);$('status').textContent='Erro ao gerar PDF: '+e.message}
+}
+function hFrom(o){return o.originalH||o.h||10}function renderFont(f){return f}
+wire();
+const pending=await getPending();if(pending){await openFile(pending);await clearPending()}
+</script>
+</body></html>
