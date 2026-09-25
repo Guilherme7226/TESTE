@@ -71,18 +71,39 @@ function findOwner(prefix){for(const k in owners)if(owners[k].prefixes.includes(
 function calcCheck(s){
 const vals={A:10,B:12,C:13,D:14,E:15,F:16,G:17,H:18,I:19,J:20,K:21,L:23,M:24,N:25,O:26,P:27,Q:28,R:29,S:30,T:31,U:32,V:34,W:35,X:36,Y:37,Z:38};
 let sum=0;for(let i=0;i<10;i++){const c=s[i],v=/[A-Z]/.test(c)?vals[c]:Number(c);sum+=v*Math.pow(2,i)}const r=sum%11;return r===10?0:r}
-function show(){
+async function show(){
 const raw=document.getElementById('container').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
 const out=document.getElementById('result');out.className='result show';
 if(raw.length!==11||!/^[A-Z]{4}[0-9]{7}$/.test(raw)){
-out.innerHTML='<div class="resultbox"><div class="status error">NÚMERO INVÁLIDO</div><p>Digite 11 caracteres no formato 4 letras + 7 números.</p></div>';return}
-const prefix=raw.slice(0,3),equip=raw[3],serial=raw.slice(4,10),check=Number(raw[10]),expected=calcCheck(raw.slice(0,10));
-const owner=findOwner(prefix);
-const valid=check===expected;
-if(!owner){
-out.innerHTML='<div class="resultbox"><div class="status warning">ARMADOR NÃO IDENTIFICADO AUTOMATICAMENTE</div><div class="code">'+raw+'</div><p>Prefixo BIC: <strong>'+prefix+'</strong>. O número '+(valid?'<span class="ok">passa na validação do dígito.</span>':'<span class="error">não passa na validação do dígito.</span>')+'</p><div class="note">O armador é identificado pelo prefixo BIC do container.</div></div>';return}
-out.innerHTML='<div class="resultbox"><div class="status '+(valid?'ok':'warning')+'">'+(valid?'CONTAINER VÁLIDO':'ATENÇÃO: DÍGITO VERIFICADOR INCONSISTENTE')+'</div><h2 class="name">'+owner.name+'</h2><div class="code">'+raw+'</div><div class="details"><div class="detail"><b>PREFIXO BIC</b><span>'+prefix+'</span></div><div class="detail"><b>TIPO DE EQUIPAMENTO</b><span>'+ (equip==='U'?'Carga':equip==='J'?'Equipamento destacável':equip==='Z'?'Chassi/reboque':'Código '+equip) +'</span></div><div class="detail"><b>IDENTIFICAÇÃO</b><span>'+serial+'</span></div></div><div class="note"><strong>Armador:</strong> '+owner.kind+'. O prefixo BIC identifica o proprietário ou operador registrado do container.</div></div>';
+out.innerHTML='<div class="resultbox"><div class="status error">NÚMERO INVÁLIDO</div><p>Digite 11 caracteres no formato 4 letras + 7 números.</p></div>';return;
 }
+const prefix=raw.slice(0,3),equip=raw[3],serial=raw.slice(4,10),check=Number(raw[10]),expected=calcCheck(raw.slice(0,10));
+const valid=check===expected;
+if(!valid){
+out.innerHTML='<div class="resultbox"><div class="status warning">ATENÇÃO: DÍGITO VERIFICADOR INCONSISTENTE</div><div class="code">'+raw+'</div><p>O dígito informado é <strong>'+check+'</strong>, mas a validação ISO 6346 indica <strong>'+expected+'</strong>.</p><p>Corrija a numeração antes de consultar.</p></div>';return;
+}
+out.innerHTML='<div class="resultbox"><div class="status">CONSULTANDO ETRACKING...</div><div class="code">'+raw+'</div><p>Aguarde...</p></div>';
+try{
+const form=new FormData();
+form.append('cnpj','08.473.312/0001-24');
+form.append('container',raw);
+const response=await fetch('https://etracking.eprofessionalti.com/controller/etracking/cliente/search_container',{method:'POST',body:form});
+if(!response.ok)throw new Error('HTTP '+response.status);
+const data=await response.json();
+if(!data.success)throw new Error(data.msg||'Consulta não autorizada');
+const c=data.container||{};
+const fields=[
+['TIPO',c.tipo],['ARMADOR',c.armador],['NAVIO',c.navio],['VIAGEM',c.viagem],
+['IMPORTADOR',c.importador],['BILL OF LADING',c.bl],['POL',c.pol],['POD',c.pod]
+];
+const cards=fields.filter(x=>x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()!=='').map(x=>'<div class="detail"><b>'+x[0]+'</b><span>'+escapeHtml(String(x[1]))+'</span></div>').join('');
+out.innerHTML='<div class="resultbox"><div class="status ok">CONSULTA REALIZADA PELO ETRACKING</div><h2 class="name">'+escapeHtml(c.armador||'Armador não informado')+'</h2><div class="code">'+raw+'</div><div class="details">'+cards+'</div><div class="note"><strong>Fonte:</strong> eTracking eProfessionalTI.</div></div>';
+}catch(err){
+console.error(err);
+out.innerHTML='<div class="resultbox"><div class="status warning">NÃO FOI POSSÍVEL CONSULTAR O ETRACKING</div><div class="code">'+raw+'</div><p>'+escapeHtml(err.message||'Erro desconhecido')+'</p><div class="note">O GitHub Pages pode bloquear a consulta por CORS ou o eTracking pode exigir uma sessão do próprio site. Nesse caso, precisaremos de um pequeno proxy seguro para fazer a consulta sem expor a sessão.</div></div>';
+}
+}
+function escapeHtml(value){return value.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 document.getElementById('search').onclick=show;
 document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')show()});
 </script>
