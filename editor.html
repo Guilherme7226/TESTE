@@ -129,7 +129,7 @@ async function addImage(file){if(!pdf)return alert('Abra um PDF primeiro.');cons
 function dataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
 function deleteSelected(){if(!selected)return; if(selected.kind==='existing'){selected.deleted=true;selected.changed=true}else objects=objects.filter(o=>o!==selected);selected=null;render(pageNum)}
 function editExistingSave(o){o.changed=true}
-$('text').addEventListener('change',()=>{if(selected&&(selected.kind==='existing'||selected.kind==='text')){selected.text=$('text').value;selected.changed=true;render(pageNum)}});
+
 
 let sigCanvas=$('sigCanvas'),sigCtx=sigCanvas.getContext('2d'),sigDrawing=false;
 function resizeSig(){const d=window.devicePixelRatio||1,r=sigCanvas.getBoundingClientRect();sigCanvas.width=r.width*d;sigCanvas.height=r.height*d;sigCtx.setTransform(d,0,0,d,0,0);sigCtx.lineWidth=2;sigCtx.lineCap='round';sigCtx.strokeStyle='#111'}
