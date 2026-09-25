@@ -29,39 +29,35 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 <section class="hero"><div class="wrap">
 <span class="eyebrow"><span class="dot"></span> DOCUMENTOS • TRANSPORTE • LOGÍSTICA</span>
 <h1>Ferramentas para sua <span>operação logística.</span></h1>
-<p>Arraste seus PDFs diretamente para a ferramenta desejada ou consulte um container. O processamento dos PDFs acontece localmente no navegador.</p>
+<p>Escolha uma das ferramentas abaixo para começar. Cada ferramenta possui acesso rápido às demais.</p>
 </div></section>
 
 <section class="tools-section"><div class="wrap">
-<div class="section-head"><h2>Ferramentas da operação</h2><p>Você não precisa abrir outra página: faça a operação diretamente aqui.</p></div>
+<div class="section-head"><h2>Ferramentas da operação</h2><p>Selecione a ferramenta que deseja utilizar.</p></div>
 <section class="tools">
 
 <article class="tool">
 <div class="icon">📎</div><h3>Compilador de PDF</h3>
-<p>Arraste dois ou mais PDFs para o quadrado e eles serão compilados automaticamente em um único arquivo.</p>
-<div class="drop" id="mergeDrop"><div class="big">📄</div><strong>Arraste os PDFs aqui</strong><small>ou clique para escolher vários</small><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple></div>
-<div class="status" id="mergeStatus">Processamento local.</div>
-<a class="cta" href="./compilador.html">Abrir compilador completo →</a>
+<p>Una dois ou mais arquivos PDF em um único documento, reorganizando a ordem das páginas.</p>
+<a class="cta" href="./compilador.html">Abrir compilador →</a>
 </article>
 
 <article class="tool">
 <div class="icon">✂️</div><h3>Separador de PDF</h3>
-<p>Arraste um PDF para o quadrado e ele será separado automaticamente, uma página por arquivo, em um ZIP.</p>
-<div class="drop" id="splitDrop"><div class="big">📄</div><strong>Arraste um PDF aqui</strong><small>ou clique para escolher um arquivo</small><input id="splitFile" type="file" accept=".pdf,application/pdf"></div>
-<div class="status" id="splitStatus">Processamento local.</div>
-<a class="cta" href="./separador.html">Abrir separador completo →</a>
+<p>Separe um PDF em arquivos individuais, uma página por arquivo, e baixe tudo em ZIP.</p>
+<a class="cta" href="./separador.html">Abrir separador →</a>
 </article>
 
 <article class="tool">
-<article class="tool"><div class="icon">📝</div><h3>Editor de PDF</h3><p>Arraste um PDF e edite textos sobre o documento em uma interface no estilo Word.</p><div class="drop" id="editDrop"><div class="big">📝</div><strong>Arraste o PDF aqui</strong><small>ou clique para abrir o editor</small><input id="editFile" type="file" accept=".pdf,application/pdf"></div><div class="status" id="editStatus">Adicione e mova textos no editor.</div><a class="cta" href="./editor.html">Abrir editor completo →</a></article>
+<div class="icon">📝</div><h3>Editor de PDF</h3>
+<p>Abra um PDF e faça edições, adicione textos, imagens, assinaturas, destaques e outros elementos.</p>
+<a class="cta" href="./editor.html">Abrir editor →</a>
+</article>
 
 <article class="tool">
 <div class="icon">🚢</div><h3>Tracking de Container</h3>
-<p>Consulte os dados retornados pelo eTracking: armador, navio, viagem, BL, importador, POL e POD.</p>
-<input class="track-input" id="container" maxlength="11" autocomplete="off" placeholder="Ex.: MRSU4679093">
-<button class="track-btn" id="trackBtn">🔎 Consultar container</button>
-<div class="track-result" id="trackResult"></div>
-<a class="cta" href="./container.html">Abrir tracking completo →</a>
+<p>Consulte os dados retornados pelo eTracking do container.</p>
+<a class="cta" href="./container.html">Abrir tracking →</a>
 </article>
 
 </section>
@@ -69,81 +65,5 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 </div></section>
 <footer class="footer">COSTALOG PDF • Ferramentas para documentos e logística</footer>
 
-<script>
-(function(){
-const key='costalog-theme',root=document.documentElement,button=document.getElementById('theme');
-function apply(dark){root.classList.toggle('dark',dark);localStorage.setItem(key,dark?'dark':'light');if(button)button.textContent=dark?'☀️':'🌙'}
-apply(localStorage.getItem(key)==='dark');button.onclick=()=>apply(!root.classList.contains('dark'));
-})();
-
-const {PDFDocument}=PDFLib;
-function wireDrop(drop,input,handler){
-['dragenter','dragover'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add('over')}));
-['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove('over')}));
-drop.addEventListener('click',()=>input.click());
-drop.addEventListener('drop',e=>{if(e.dataTransfer.files.length)handler([...e.dataTransfer.files])});
-input.addEventListener('change',e=>{if(e.target.files.length)handler([...e.target.files]);e.target.value=''});
-}
-
-async function compile(files){
-const out=PDFDocument.create();return out;
-}
-async function mergePDFs(files){
-const valid=files.filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
-const status=document.getElementById('mergeStatus');
-if(!valid.length){status.textContent='Nenhum PDF válido encontrado.';status.className='status error';return}
-if(valid.length<2){status.textContent='Selecione pelo menos 2 PDFs para compilar.';status.className='status warn';return}
-status.textContent='Compilando '+valid.length+' PDFs...';status.className='status';
-try{
-const out=await PDFDocument.create();
-for(const f of valid){const src=await PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p))}
-const blob=new Blob([await out.save()],{type:'application/pdf'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='COSTALOG-PDF-compilado.pdf';a.click();URL.revokeObjectURL(url);
-status.textContent='✓ PDF compilado com sucesso.';status.className='status ok';
-}catch(e){console.error(e);status.textContent='Erro ao compilar o PDF.';status.className='status error'}
-}
-
-async function splitPDF(files){
-const status=document.getElementById('splitStatus'),f=files.find(x=>x.type==='application/pdf'||/\.pdf$/i.test(x.name));
-if(!f){status.textContent='Nenhum PDF válido encontrado.';status.className='status error';return}
-status.textContent='Separando páginas...';status.className='status';
-try{
-const pdf=await PDFDocument.load(await f.arrayBuffer()),zip=new JSZip(),base=f.name.replace(/\.pdf$/i,'');
-for(let i=0;i<pdf.getPageCount();i++){const out=await PDFDocument.create(),[page]=await out.copyPages(pdf,[i]);out.addPage(page);zip.file(base+'-pagina-'+(i+1)+'.pdf',await out.save())}
-const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=base+'-separado.zip';a.click();URL.revokeObjectURL(url);
-status.textContent='✓ PDF separado em '+pdf.getPageCount()+' arquivos.';status.className='status ok';
-}catch(e){console.error(e);status.textContent='Erro ao separar o PDF.';status.className='status error'}
-}
-wireDrop(document.getElementById('mergeDrop'),document.getElementById('mergeFiles'),mergePDFs);
-wireDrop(document.getElementById('splitDrop'),document.getElementById('splitFile'),splitPDF);
-
-function calcCheck(s){
-const vals={A:10,B:12,C:13,D:14,E:15,F:16,G:17,H:18,I:19,J:20,K:21,L:23,M:24,N:25,O:26,P:27,Q:28,R:29,S:30,T:31,U:32,V:34,W:35,X:36,Y:37,Z:38};
-let sum=0;for(let i=0;i<10;i++){const c=s[i],v=/[A-Z]/.test(c)?vals[c]:Number(c);sum+=v*Math.pow(2,i)}const r=sum%11;return r===10?0:r
-}
-function esc(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-async function track(){
-const raw=document.getElementById('container').value.toUpperCase().replace(/[^A-Z0-9]/g,''),out=document.getElementById('trackResult');out.className='track-result show';
-if(raw.length!==11||!/^[A-Z]{4}[0-9]{7}$/.test(raw)){out.innerHTML='<b>Numeração inválida.</b><br><small>Use 4 letras + 7 números.</small>';return}
-const expected=calcCheck(raw.slice(0,10));if(Number(raw[10])!==expected){out.innerHTML='<b> Dígito verificador inconsistente.</b><br><small>Para '+raw+' o dígito esperado é '+expected+'.</small>';return}
-out.innerHTML='<small>Consultando eTracking...</small>';
-try{
-const response=await fetch('https://SEU-WORKER.workers.dev/container',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({container:raw})});
-if(!response.ok)throw Error('HTTP '+response.status);const data=await response.json();if(!data.success)throw Error(data.msg||'Consulta não autorizada');
-const c=data.container||{},fields=[['TIPO',c.tipo],['NAVIO',c.navio],['VIAGEM',c.viagem],['IMPORTADOR',c.importador],['BL',c.bl],['POL',c.pol],['POD',c.pod]];
-const cards=fields.filter(x=>x[1]!==undefined&&x[1]!==null&&String(x[1]).trim()).map(x=>'<div class="track-item"><b>'+x[0]+'</b><span>'+esc(x[1])+'</span></div>').join('');
-out.innerHTML='<div class="track-code">'+esc(raw)+'</div><div class="track-armador">'+esc(c.armador||'Armador não informado')+'</div><div class="track-grid">'+cards+'</div>';
-}catch(e){out.innerHTML='<span style="color:#8a5a00">Worker ainda não publicado/configurado.</span><br><small>'+esc(e.message)+'</small>'}
-}
-document.getElementById('trackBtn').onclick=track;document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')track()});
-</script>
-<script>
-(function(){
-const d=document.getElementById("editDrop"),f=document.getElementById("editFile"),s=document.getElementById("editStatus");if(!d)return;
-function db(){return new Promise((res,rej)=>{const q=indexedDB.open("costalog-pdf",1);q.onupgradeneeded=()=>q.result.createObjectStore("files");q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
-async function openEditor(file){try{const dbi=await db();const tx=dbi.transaction("files","readwrite");tx.objectStore("files").put(file,"editor");tx.oncomplete=()=>location.href="./editor.html";tx.onerror=()=>{s.textContent="Não foi possível preparar o PDF.";s.className="status error"}}catch(e){s.textContent="Erro ao abrir o editor.";s.className="status error"}}
-d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.classList.add("over")};d.ondragleave=()=>d.classList.remove("over");
-d.ondrop=e=>{e.preventDefault();d.classList.remove("over");if(e.dataTransfer.files[0])openEditor(e.dataTransfer.files[0])};
-f.onchange=e=>{if(e.target.files[0])openEditor(e.target.files[0]);f.value=""};
-})();
-</script></body>
+</body>
 </html>
