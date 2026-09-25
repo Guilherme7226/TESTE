@@ -37,7 +37,7 @@ $('consult').onclick=async()=>{
  if(k.length!==44)return setStatus('A chave precisa ter 44 dígitos.','error');
  setStatus('Consultando NF-e...');
  try{
-  const r=await fetch('https://consultadanfe.com/api/v1/consulta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chave:k,format:'json'})});
+  const r=await fetch('https://SEU-WORKER.workers.dev/nfe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chave:k,format:'json'})});
   const j=await r.json();
   if(!r.ok||j.status!=='ok')throw Error(j.message||j.error||'Não foi possível consultar a NF-e.');
   if(!j.pdf_base64||!j.xml_base64)throw Error('A API não retornou o DANFE PDF e o XML.');
