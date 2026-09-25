@@ -179,4 +179,18 @@ function hFrom(o){return o.originalH||o.h||10}function renderFont(f){return f}
 wire();
 const pending=await getPending();if(pending){await openFile(pending);await clearPending()}
 </script>
-</body></html>
+<script>
+(function(){
+  const key='costalog-theme';
+  const root=document.documentElement;
+  const button=document.getElementById('theme');
+  const apply=mode=>{
+    const dark=mode==='dark';
+    root.classList.toggle('dark',dark);
+    localStorage.setItem(key,dark?'dark':'light');
+    if(button) button.textContent=dark?'☀️':'🌙';
+  };
+  apply(localStorage.getItem(key)==='dark'?'dark':'light');
+  if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
+})();
+</script></body></html>
