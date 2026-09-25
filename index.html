@@ -16,8 +16,8 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 .drop{border:2px dashed #aaa;border-radius:14px;padding:27px 12px;text-align:center;background:var(--surface);cursor:pointer;transition:.15s}.drop:hover,.drop.over{border-color:var(--red);background:#d7192008}.drop .big{font-size:36px}.drop strong{display:block;margin-top:5px}.drop small{display:block;color:var(--muted);margin-top:4px}.drop input{display:none}
 .status{min-height:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:10px}.status.ok{color:var(--ok);font-weight:800}.status.error{color:#b00000}.status.warn{color:var(--warn)}
 .track-input{width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font-size:18px;font-weight:800;letter-spacing:1px;text-transform:uppercase;outline:none}.track-input:focus{border-color:var(--red)}.track-btn{width:100%;margin-top:9px;border:0;border-radius:10px;padding:12px;background:linear-gradient(135deg,var(--red2),var(--red));color:#fff;font-weight:850;cursor:pointer}.track-result{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface);display:none}.track-result.show{display:block}.track-code{font-family:monospace;font-weight:900;letter-spacing:1px}.track-armador{font-size:19px;font-weight:900;margin:4px 0}.track-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.track-item{border:1px solid var(--line);border-radius:7px;padding:7px;background:var(--card)}.track-item b{display:block;font-size:9px;color:var(--muted)}.track-item span{font-size:12px;font-weight:800}.cta{display:inline-block;margin-top:auto;background:var(--red);color:#fff;padding:10px 13px;border-radius:8px;text-decoration:none;font-weight:850;text-align:center}
-.about{margin-top:20px;border-left:5px solid var(--red);border-radius:12px;padding:20px;background:var(--surface);color:var(--text)}.about p{color:var(--muted);margin:5px 0 0;line-height:1.5}.footer{border-top:2px solid var(--red);padding:23px 0;text-align:center;color:var(--muted);font-size:12px}
-@media(max-width:850px){.tools{grid-template-columns:1fr}.tool>p{min-height:0}.navlinks a{display:none}}@media(max-width:500px){.hero{padding:42px 0}.hero h1{letter-spacing:-2px}.track-grid{grid-template-columns:1fr}}
+.nfe-wide{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr minmax(300px,1fr);align-items:center;gap:18px}.nfe-wide p{min-height:0;margin:0}.nfe-wide form{display:flex;gap:8px;align-items:center}.nfe-wide .track-input{flex:1}.nfe-wide .track-btn{width:auto;margin:0;white-space:nowrap}.nfe-wide .status{position:absolute;margin-top:70px}.about{margin-top:20px;border-left:5px solid var(--red);border-radius:12px;padding:20px;background:var(--surface);color:var(--text)}.about p{color:var(--muted);margin:5px 0 0;line-height:1.5}.footer{border-top:2px solid var(--red);padding:23px 0;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:850px){.tools{grid-template-columns:1fr}.nfe-wide{grid-column:auto;display:block}.nfe-wide form{display:block}.nfe-wide .track-btn{width:100%;margin-top:9px}.nfe-wide .status{position:static;margin-top:10px}.tool>p{min-height:0}.navlinks a{display:none}}@media(max-width:500px){.hero{padding:42px 0}.hero h1{letter-spacing:-2px}.track-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -58,7 +58,15 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 
 
 </section>
-<div class="about"><strong>🚚 COSTALOG</strong><p>Ferramentas rápidas para a rotina logística. PDFs são processados localmente e não precisam ser enviados para um servidor.</p></div>
+<article class="tool nfe-wide">
+<div class="icon">🧾</div><h3>NF-e / DANFE</h3>
+<p>Consulte uma nota fiscal pela chave de acesso de 44 dígitos e gere o DANFE.</p>
+<form id="homeNfeForm">
+<input id="homeNfeKey" class="track-input" maxlength="49" inputmode="numeric" placeholder="Digite a chave de acesso">
+<button class="track-btn" type="submit">🔎 Consultar NF-e</button>
+<div id="homeNfeStatus" class="status"></div>
+</form>
+</article>
 </div></section>
 <footer class="footer">COSTALOG PDF • Ferramentas para documentos e logística</footer>
 
