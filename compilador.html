@@ -133,7 +133,8 @@ async function abrirPreview(p){
 }
 
 function fecharPreview(){$('zoomModal').classList.remove('show')}
-\nnew Sortable($('grid'),{animation:150,onEnd:()=>{
+
+new Sortable($('grid'),{animation:150,onEnd:()=>{
  const ordem=[];
  document.querySelectorAll('.page').forEach(card=>{const p=paginas.find(x=>x.id===card.dataset.id);if(p)ordem.push(p)});
  paginas=ordem;atualizar();
