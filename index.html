@@ -23,7 +23,7 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 <body>
 <header class="topbar"><div class="wrap nav">
 <a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a>
-<nav class="navlinks"><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><a href="./container.html">🚢 Container</a><button class="theme" id="theme">🌙</button></nav>
+<nav class="navlinks"><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><a href="./container.html">🚢 Container</a><a href="./nfe.html">🧾 NF-e / DANFE</a><button class="theme" id="theme">🌙</button></nav>
 </div></header>
 
 <section class="hero"><div class="wrap">
@@ -54,6 +54,17 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 <a class="cta" href="./container.html">Abrir tracking →</a>
 </article>
 
+
+<article class="tool">
+<div class="icon">🧾</div><h3>NF-e / DANFE</h3>
+<p>Consulte uma nota fiscal pela chave de acesso de 44 dígitos e gere o DANFE.</p>
+<form id="homeNfeForm" style="margin-top:auto">
+<input id="homeNfeKey" class="track-input" maxlength="49" inputmode="numeric" placeholder="Digite a chave de acesso">
+<button class="track-btn" type="submit">🔎 Consultar NF-e</button>
+<div id="homeNfeStatus" class="status"></div>
+</form>
+</article>
+
 </section>
 <div class="about"><strong>🚚 COSTALOG</strong><p>Ferramentas rápidas para a rotina logística. PDFs são processados localmente e não precisam ser enviados para um servidor.</p></div>
 </div></section>
@@ -73,5 +84,7 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
   apply(localStorage.getItem(key)==='dark'?'dark':'light');
   if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
 })();
+const nfeForm=document.getElementById('homeNfeForm');
+if(nfeForm){const nk=document.getElementById('homeNfeKey'),ns=document.getElementById('homeNfeStatus');nk.oninput=e=>e.target.value=e.target.value.replace(/\\D/g,'').slice(0,44).replace(/(.{4})/g,'$1 ').trim();nfeForm.onsubmit=e=>{e.preventDefault();const k=nk.value.replace(/\\D/g,'');if(k.length!==44){ns.textContent='A chave precisa ter 44 dígitos.';ns.className='status error';return}location.href='./nfe.html?chave='+encodeURIComponent(k)}}}
 </script></body>
 </html>
