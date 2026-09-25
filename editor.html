@@ -33,11 +33,9 @@ html.dark{--bg:#090909;--card:#151515;--surface:#101010;--text:#fff;--muted:#aaa
 
 <div class="workspace">
 <aside class="side">
-<h3>Documento</h3>
-<label class="drop" id="drop"><strong>📄 Arraste o PDF</strong><small>ou clique para abrir</small><input id="file" type="file" accept="application/pdf"></label>
-<div id="status" class="status"></div><div id="thumbs"></div>
+<h3>Páginas</h3><div id="status" class="status"></div><div id="thumbs"></div>
 </aside>
-<main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong>Abra ou arraste um PDF para começar.</div><div id="page" class="page" style="display:none"><div id="layer" class="layer"></div></div></main>
+<main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong><div id="drop" class="drop" style="width:min(430px,90vw);margin:22px auto 0"><strong>📄 Arraste o PDF aqui</strong><small>ou clique para abrir</small><input id="file" type="file" accept="application/pdf"></div></div><div id="page" class="page" style="display:none"><div id="layer" class="layer"></div></div></main>
 <aside class="side right">
 <div class="section"><h3>Propriedades</h3><div class="label">Texto selecionado</div><textarea id="text" class="textedit" placeholder="Clique em um texto existente ou adicionado."></textarea><div class="row"><input id="size" class="input" type="number" min="6" max="96" value="16" title="Tamanho"><button class="btn" id="bold"><b>B</b></button><button class="btn" id="del">🗑 Apagar</button></div></div>
 <div class="section"><h3>Inserir</h3><div class="row"><button class="btn" id="addText">＋ Texto</button><button class="btn" id="addField">▤ Campo</button><button class="btn" id="addCheck">☑ Checkbox</button></div><p class="help">Para texto existente, clique diretamente sobre a palavra/bloco. O editor permite substituir ou cobrir o conteúdo no PDF exportado.</p></div>
