@@ -87,7 +87,7 @@ try{
 const form=new FormData();
 form.append('cnpj','08.473.312/0001-24');
 form.append('container',raw);
-const response=await fetch('https://etracking.eprofessionalti.com/controller/etracking/cliente/search_container',{method:'POST',body:form});
+const response=await fetch('https://SEU-WORKER.workers.dev/container',{method:'POST',body:form});
 if(!response.ok)throw new Error('HTTP '+response.status);
 const data=await response.json();
 if(!data.success)throw new Error(data.msg||'Consulta não autorizada');
