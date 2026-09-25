@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Identificador de Container | COSTALOG</title>
+<meta name="description" content="Consulte o armador ou proprietário associado ao prefixo BIC de um container.">
+<style>
+:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--red:#d71920;--red2:#a80f15;--ok:#16803c;--warn:#8a5a00}
+html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa;--line:#2b2b2b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}.wrap{width:min(1050px,92%);margin:auto}
+.topbar{background:var(--bg);border-bottom:2px solid var(--red)}.nav{height:82px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}.mark{width:45px;height:45px;border-radius:9px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;display:grid;place-items:center;font-weight:950;font-size:21px}.brand strong{display:block;font-size:20px;letter-spacing:.7px}.brand small{display:block;font-size:8px;letter-spacing:2.5px;font-weight:900;margin-top:2px}.navlinks{display:flex;gap:8px;align-items:center}.navlinks a,.theme{border:1px solid var(--line);background:var(--card);color:var(--text);padding:10px 13px;border-radius:8px;text-decoration:none;font-weight:750;cursor:pointer}.navlinks a:hover,.theme:hover{background:var(--red);border-color:var(--red);color:#fff}
+main{padding:58px 0 70px}.hero{margin-bottom:24px}.eyebrow{display:inline-flex;padding:8px 13px;border:1px solid var(--line);border-radius:99px;background:var(--surface);font-size:12px;font-weight:850}.dot{width:7px;height:7px;border-radius:50%;background:var(--red);margin:4px 8px 0 0}.hero h1{font-size:clamp(36px,6vw,58px);line-height:1;margin:18px 0 12px;letter-spacing:-2px}.hero h1 span{color:var(--red)}.hero p{color:var(--muted);font-size:17px;line-height:1.6;max-width:700px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 14px 35px #00000012}.search{display:flex;gap:10px;margin-top:18px}.search input{flex:1;min-width:0;padding:15px 16px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font-size:20px;font-weight:800;letter-spacing:1px;text-transform:uppercase;outline:none}.search input:focus{border-color:var(--red);box-shadow:0 0 0 3px #d7192020}.search button{border:0;border-radius:9px;padding:0 22px;background:var(--red);color:#fff;font-weight:850;font-size:15px;cursor:pointer}.search button:hover{background:var(--red2)}
+.hint{font-size:12px;color:var(--muted);margin-top:9px}.result{margin-top:20px;display:none}.result.show{display:block}.resultbox{border:1px solid var(--line);border-left:5px solid var(--red);border-radius:12px;padding:20px;background:var(--surface)}.status{font-size:12px;font-weight:850;letter-spacing:.5px;margin-bottom:7px}.name{font-size:28px;font-weight:900;margin:0 0 5px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:850;letter-spacing:2px}.details{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.detail{border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--card)}.detail b{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.detail span{font-weight:800}.note{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.55}.note a{color:var(--red);font-weight:800}
+.info{margin-top:20px;color:var(--muted);font-size:13px;line-height:1.6}.info strong{color:var(--text)}
+.error{color:#b00000}.ok{color:var(--ok)}.warning{color:var(--warn)}
+footer{border-top:2px solid var(--red);padding:24px 0;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:700px){.nav{height:72px}.navlinks a{display:none}.search{flex-direction:column}.search button{height:50px}.details{grid-template-columns:1fr}.card{padding:20px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap nav">
+<a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a>
+<nav class="navlinks">
+<a href="./">🏠 Início</a><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><button class="theme" id="theme">🌙</button>
+</nav>
+</div></header>
+<main><div class="wrap">
+<section class="hero">
+<span class="eyebrow"><span class="dot"></span> CONSULTA DE CONTAINER</span>
+<h1>Descubra o <span>armador</span> pelo número do container.</h1>
+<p>Digite a numeração completa do container e a COSTALOG identifica o prefixo BIC, valida o número e mostra a empresa associada ao código conhecido.</p>
+</section>
+<section class="card">
+<label for="container"><strong>Número do container</strong></label>
+<div class="search"><input id="container" maxlength="11" autocomplete="off" placeholder="Ex.: MSCU1234567"><button id="search">Consultar</button></div>
+<div class="hint">Formato ISO 6346: 4 letras + 6 números + dígito verificador.</div>
+<div id="result" class="result"></div>
+<div class="info"><strong>Importante:</strong> o prefixo BIC identifica o proprietário ou operador registrado do equipamento. Isso não garante, sozinho, que essa empresa seja o armador que transportou a carga, porque existem containers alugados e compartilhados entre armadores.</div>
+</section>
+</div></main>
+<footer>COSTALOG PDF • Identificador de Containers</footer>
+<script>
+(function(){
+const key='costalog-theme',root=document.documentElement,button=document.getElementById('theme');
+function apply(dark){root.classList.toggle('dark',dark);localStorage.setItem(key,dark?'dark':'light');if(button)button.textContent=dark?'☀️':'🌙'}
+apply(localStorage.getItem(key)==='dark');if(button)button.onclick=()=>apply(!root.classList.contains('dark'));
+})();
+const owners={
+MSC:{name:'MSC Mediterranean Shipping Company',prefixes:['MSC','MED'],kind:'Armador / operador'},
+MSK:{name:'Maersk',prefixes:['MAE','MSK','MRK'],kind:'Armador / operador'},
+CMA:{name:'CMA CGM',prefixes:['CMA'],kind:'Armador / operador'},
+COS:{name:'COSCO Shipping',prefixes:['COS'],kind:'Armador / operador'},
+OOCL:{name:'OOCL — Orient Overseas Container Line',prefixes:['OOL'],kind:'Armador / operador'},
+HAPAG:{name:'Hapag-Lloyd',prefixes:['HLC','HLX'],kind:'Armador / operador'},
+ONE:{name:'Ocean Network Express (ONE)',prefixes:['ONE'],kind:'Armador / operador'},
+EVERGREEN:{name:'Evergreen Marine',prefixes:['EGL','EMC'],kind:'Armador / operador'},
+YANGMING:{name:'Yang Ming Marine Transport',prefixes:['YML','YMJ'],kind:'Armador / operador'},
+ZIM:{name:'ZIM Integrated Shipping Services',prefixes:['ZIM'],kind:'Armador / operador'},
+HMM:{name:'HMM — Hyundai Merchant Marine',prefixes:['HDM'],kind:'Armador / operador'},
+WANHAI:{name:'Wan Hai Lines',prefixes:['WHL'],kind:'Armador / operador'},
+PIL:{name:'PIL — Pacific International Lines',prefixes:['PCI'],kind:'Armador / operador'},
+SITC:{name:'SITC International',prefixes:['SIT'],kind:'Armador / operador'},
+MATSON:{name:'Matson',prefixes:['MAT'],kind:'Armador / operador'},
+ANL:{name:'ANL Container Line',prefixes:['ANL'],kind:'Armador / operador'},
+APL:{name:'APL — American President Lines',prefixes:['APL'],kind:'Armador / operador'},
+CROWLEY:{name:'Crowley',prefixes:['CNU'],kind:'Transportador / operador'}
+};
+function findOwner(prefix){for(const k in owners)if(owners[k].prefixes.includes(prefix))return owners[k];return null}
+function calcCheck(s){
+const vals={A:10,B:12,C:13,D:14,E:15,F:16,G:17,H:18,I:19,J:20,K:21,L:23,M:24,N:25,O:26,P:27,Q:28,R:29,S:30,T:31,U:32,V:34,W:35,X:36,Y:37,Z:38};
+let sum=0;for(let i=0;i<10;i++){const c=s[i],v=/[A-Z]/.test(c)?vals[c]:Number(c);sum+=v*Math.pow(2,i)}const r=sum%11;return r===10?0:r}
+function show(){
+const raw=document.getElementById('container').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+const out=document.getElementById('result');out.className='result show';
+if(raw.length!==11||!/^[A-Z]{4}[0-9]{7}$/.test(raw)){
+out.innerHTML='<div class="resultbox"><div class="status error">NÚMERO INVÁLIDO</div><p>Digite 11 caracteres no formato 4 letras + 7 números.</p></div>';return}
+const prefix=raw.slice(0,3),equip=raw[3],serial=raw.slice(4,10),check=Number(raw[10]),expected=calcCheck(raw.slice(0,10));
+const owner=findOwner(prefix);
+const valid=check===expected;
+if(!owner){
+out.innerHTML='<div class="resultbox"><div class="status warning">PREFIXO NÃO ENCONTRADO NA BASE LOCAL</div><div class="code">'+raw+'</div><p>Prefixo BIC: <strong>'+prefix+'</strong>. O número '+(valid?'<span class="ok">passa na validação do dígito.</span>':'<span class="error">não passa na validação do dígito.</span>')+'</p><div class="note">Para uma consulta completa do registro BIC, use a base oficial do Bureau International des Containers: <a href="https://www.bic-code.org/bic-codes/" target="_blank" rel="noopener">BIC Codes</a>.</div></div>';return}
+out.innerHTML='<div class="resultbox"><div class="status '+(valid?'ok':'warning')+'">'+(valid?'CONTAINER VÁLIDO':'ATENÇÃO: DÍGITO VERIFICADOR INCONSISTENTE')+'</div><h2 class="name">'+owner.name+'</h2><div class="code">'+raw+'</div><div class="details"><div class="detail"><b>PREFIXO BIC</b><span>'+prefix+'</span></div><div class="detail"><b>TIPO DE EQUIPAMENTO</b><span>'+ (equip==='U'?'Carga':equip==='J'?'Equipamento destacável':equip==='Z'?'Chassi/reboque':'Código '+equip) +'</span></div><div class="detail"><b>IDENTIFICAÇÃO</b><span>'+serial+'</span></div></div><div class="note"><strong>Associação:</strong> '+owner.kind+'. O prefixo identifica o proprietário/operador registrado do container; não é uma garantia de que ele seja o transportador da carga.</div></div>';
+}
+document.getElementById('search').onclick=show;
+document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')show()});
+</script>
+</body>
+</html>
