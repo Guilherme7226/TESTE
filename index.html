@@ -65,5 +65,19 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 </div></section>
 <footer class="footer">COSTALOG PDF • Ferramentas para documentos e logística</footer>
 
-</body>
+<script>
+(function(){
+  const key='costalog-theme';
+  const root=document.documentElement;
+  const button=document.getElementById('theme');
+  const apply=mode=>{
+    const dark=mode==='dark';
+    root.classList.toggle('dark',dark);
+    localStorage.setItem(key,dark?'dark':'light');
+    if(button) button.textContent=dark?'☀️':'🌙';
+  };
+  apply(localStorage.getItem(key)==='dark'?'dark':'light');
+  if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
+})();
+</script></body>
 </html>
