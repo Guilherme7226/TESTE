@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consulta de Containers | COSTALOG</title>
+<style>
+:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--red:#d71920;--ok:#16803c;--blue:#0d6efd}
+html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa;--line:#2b2b2b}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{width:min(900px,92%);margin:auto}.top{border-bottom:2px solid var(--red);padding:18px 0}.brand{font-weight:900;font-size:21px}.brand span{color:var(--red)}
+main{padding:42px 0 70px}h1{font-size:clamp(32px,6vw,52px);margin:0 0 10px}.intro{color:var(--muted);line-height:1.6}.card{margin-top:25px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:25px;box-shadow:0 10px 30px #00000012}
+textarea{width:100%;min-height:240px;resize:vertical;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px monospace;outline:none}textarea:focus{border-color:var(--red)}
+.buttons{display:flex;gap:10px;margin-top:12px}.btn{border:0;border-radius:9px;padding:14px 18px;font-weight:850;cursor:pointer}.primary{background:var(--red);color:#fff}.blue{background:var(--blue);color:#fff}.gray{background:var(--surface);color:var(--text);border:1px solid var(--line)}
+#resultado{margin-top:22px}.table{border:1px solid var(--line);border-radius:10px;overflow:hidden}.row{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:13px 15px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.head{font-weight:900;background:var(--surface)}.status{font-weight:700}.notfound{color:#a00}.empty{color:#8a5a00}.whatsapp{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);white-space:pre-wrap;line-height:1.55}.hidden{display:none}.msg{padding:12px;border-radius:9px;background:var(--surface);color:var(--muted)}
+@media(max-width:600px){.buttons{flex-direction:column}.row{grid-template-columns:1fr}.head{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand"><span>C</span> COSTALOG</div></div></header>
+<main><div class="wrap">
+<h1>Consulta de <span style="color:var(--red)">Containers</span></h1>
+<p class="intro">Cole quantos containers quiser, um por linha. A consulta procura o container na coluna <b>T</b> da aba <b>Mapa 1</b> e retorna o status da coluna <b>AY</b>.</p>
+<section class="card">
+<textarea id="entrada" placeholder="HAMU2635788
+TCNU6894772
+MRKU6243716
+KKTU8188495"></textarea>
+<div class="buttons"><button class="btn primary" onclick="consultar()">🔎 CONSULTAR</button><button id="copiar" class="btn blue hidden" onclick="copiar()">📋 COPIAR PARA WHATSAPP</button><button class="btn gray" onclick="limpar()">LIMPAR</button></div>
+<div id="resultado"></div>
+</section></div></main>
+<script>
+const API='https://script.google.com/macros/s/AKfycbxyAgJZpSXA-tZ2u5jmni49jhcAJ2T062byfXGPmLVMK8j7tRN5cfsPR6WYImFTZ3Xm/exec';
+let textoWhatsapp='';
+function consultar(){
+ const lista=document.getElementById('entrada').value.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+ if(!lista.length){alert('Digite pelo menos um container.');return;}
+ document.getElementById('resultado').innerHTML='<div class="msg">🔎 Consultando...</div>';
+ document.getElementById('copiar').classList.add('hidden');
+ const url=API+'?containers='+encodeURIComponent(lista.join(','));
+ fetch(url).then(r=>r.json()).then(data=>{
+  if(!data.success)throw new Error(data.erro||'Erro na consulta');
+  textoWhatsapp=data.whatsapp;
+  let html='<div class="table"><div class="row head"><div>CONTAINER</div><div>STATUS</div></div>';
+  data.resultados.forEach(x=>{const cls=x.status==='NÃO ENCONTRADO'?'notfound':(x.status==='STATUS VAZIO'?'empty':'');html+='<div class="row"><div><b>'+esc(x.container)+'</b></div><div class="status '+cls+'">'+esc(x.status)+'</div></div>';});
+  html+='</div><div class="whatsapp">'+esc(textoWhatsapp)+'</div>';
+  document.getElementById('resultado').innerHTML=html;
+  document.getElementById('copiar').classList.remove('hidden');
+ }).catch(e=>{document.getElementById('resultado').innerHTML='<div class="msg">❌ '+esc(e.message)+'</div>';});
+}
+function copiar(){navigator.clipboard.writeText(textoWhatsapp).then(()=>alert('✅ Copiado para o WhatsApp!')).catch(()=>alert('Selecione o texto e copie manualmente.'));}
+function limpar(){document.getElementById('entrada').value='';document.getElementById('resultado').innerHTML='';document.getElementById('copiar').classList.add('hidden');textoWhatsapp='';}
+function esc(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+</script>
+</body>
+</html>
