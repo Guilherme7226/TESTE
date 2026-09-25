@@ -62,6 +62,14 @@ main{padding:58px 0 70px}.hero{margin-bottom:24px}.eyebrow{display:inline-flex;p
 </section>
 </div></main>
 
+<div id="zoomModal" class="zoom-modal">
+<button class="zoom-close" id="zoomClose" type="button">×</button>
+<div class="zoom-box">
+<div id="zoomTitle" style="font-weight:800;padding:6px 8px;color:#111"></div>
+<canvas id="zoomCanvas"></canvas>
+</div>
+</div>
+
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 let paginas=[];
@@ -122,7 +130,10 @@ async function abrirPreview(p){
   $('zoomTitle').textContent=p.fileName+' • Página '+p.pageNumber;
   modal.classList.add('show');
  }catch(err){console.error(err);alert('Não foi possível abrir a pré-visualização.')}
-}\n\nfunction fecharPreview(){$('zoomModal').classList.remove('show')}\n\nnew Sortable($('grid'),{animation:150,onEnd:()=>{
+}
+
+function fecharPreview(){$('zoomModal').classList.remove('show')}
+\nnew Sortable($('grid'),{animation:150,onEnd:()=>{
  const ordem=[];
  document.querySelectorAll('.page').forEach(card=>{const p=paginas.find(x=>x.id===card.dataset.id);if(p)ordem.push(p)});
  paginas=ordem;atualizar();
@@ -158,6 +169,10 @@ document.addEventListener('drop',async e=>{if(isFileDrag(e)){e.preventDefault();
  const apply=dark=>{root.classList.toggle('dark',dark);localStorage.setItem(key,dark?'dark':'light');button.textContent=dark?'☀️':'🌙'};
  apply(localStorage.getItem(key)==='dark');button.onclick=()=>apply(!root.classList.contains('dark'));
 })();
+$('zoomClose').onclick=fecharPreview;
+$('zoomModal').onclick=e=>{if(e.target.id==='zoomModal')fecharPreview()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharPreview()});
+
 </script>
 </body>
 </html>
