@@ -53,6 +53,9 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 </article>
 
 <article class="tool">
+<article class="tool"><div class="icon">📝</div><h3>Editor de PDF</h3><p>Arraste um PDF e edite textos sobre o documento em uma interface no estilo Word.</p><div class="drop" id="editDrop"><div class="big">📝</div><strong>Arraste o PDF aqui</strong><small>ou clique para abrir o editor</small><input id="editFile" type="file" accept=".pdf,application/pdf"></div><div class="status" id="editStatus">Adicione e mova textos no editor.</div><a class="cta" href="./editor.html">Abrir editor completo →</a></article>
+
+<article class="tool">
 <div class="icon">🚢</div><h3>Tracking de Container</h3>
 <p>Consulte os dados retornados pelo eTracking: armador, navio, viagem, BL, importador, POL e POD.</p>
 <input class="track-input" id="container" maxlength="11" autocomplete="off" placeholder="Ex.: MRSU4679093">
@@ -133,5 +136,5 @@ out.innerHTML='<div class="track-code">'+esc(raw)+'</div><div class="track-armad
 }
 document.getElementById('trackBtn').onclick=track;document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')track()});
 </script>
-</body>
+<script>\n(function(){const d=document.getElementById("editDrop"),f=document.getElementById("editFile");if(!d)return;d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.classList.add("over")};d.ondragleave=()=>d.classList.remove("over");d.ondrop=e=>{e.preventDefault();d.classList.remove("over");if(e.dataTransfer.files[0])location.href="./editor.html"};f.onchange=e=>{if(e.target.files[0])location.href="./editor.html"}})();\n</script></body>
 </html>
