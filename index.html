@@ -62,7 +62,7 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 <div class="icon">🧾</div><h3>NF-e / DANFE</h3>
 
 <form id="homeNfeForm">
-<input id="homeNfeKey" class="track-input" maxlength="49" inputmode="numeric" placeholder="Digite a chave de acesso">
+<input id="homeNfeKey" class="track-input" maxlength="54" inputmode="numeric" placeholder="Digite a chave de acesso">
 <button class="track-btn" type="submit">🔎 Consultar NF-e</button>
 <div id="homeNfeStatus" class="status"></div>
 </form>
@@ -85,6 +85,6 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
   if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
 })();
 const nfeForm=document.getElementById('homeNfeForm');
-if(nfeForm){const nk=document.getElementById('homeNfeKey'),ns=document.getElementById('homeNfeStatus');nk.oninput=e=>e.target.value=e.target.value.replace(/\\D/g,'').slice(0,44).replace(/(.{4})/g,'$1 ').trim();nfeForm.onsubmit=e=>{e.preventDefault();const k=nk.value.replace(/\\D/g,'');if(k.length!==44){ns.textContent='A chave precisa ter 44 dígitos.';ns.className='status error';return}location.href='./nfe.html?chave='+encodeURIComponent(k)}}}
+if(nfeForm){const nk=document.getElementById('homeNfeKey'),ns=document.getElementById('homeNfeStatus');nk.oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,44).replace(/(.{4})/g,'$1 ').trim();nfeForm.onsubmit=e=>{e.preventDefault();const k=nk.value.replace(/\D/g,'');if(k.length!==44){ns.textContent='A chave precisa ter 44 dígitos.';ns.className='status error';return}location.href='./nfe.html?chave='+encodeURIComponent(k)}}}
 </script></body>
 </html>
