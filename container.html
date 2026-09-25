@@ -97,5 +97,19 @@ function escapeHtml(value){return value.replace(/[&<>"']/g,m=>({'&':'&amp;','<':
 document.getElementById('search').onclick=show;
 document.getElementById('container').addEventListener('keydown',e=>{if(e.key==='Enter')show()});
 </script>
-</body>
+<script>
+(function(){
+  const key='costalog-theme';
+  const root=document.documentElement;
+  const button=document.getElementById('theme');
+  const apply=mode=>{
+    const dark=mode==='dark';
+    root.classList.toggle('dark',dark);
+    localStorage.setItem(key,dark?'dark':'light');
+    if(button) button.textContent=dark?'☀️':'🌙';
+  };
+  apply(localStorage.getItem(key)==='dark'?'dark':'light');
+  if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
+})();
+</script></body>
 </html>
