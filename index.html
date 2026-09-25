@@ -24,10 +24,36 @@ html.dark .nav a,html.dark .nav button{background:#121212!important;color:#fff!i
 html.dark .secondary,html.dark .ghost{background:#1b1b1b!important;color:#ddd!important}
 html.dark .danger{background:#2b1112!important;color:#ff7b7b!important}
 html.dark .field{background:#121212!important;color:#fff!important;border-color:#2b2b2b!important}
+</style><style id="costalog-theme-final">
+:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--input:#fff;--soft:#f1f1f1}
+html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa;--line:#2b2b2b;--input:#121212;--soft:#1b1b1b}
+html,body{background:var(--bg)!important;color:var(--text)!important}
+body *{border-color:var(--line)}
+body p,body .muted,body .size,body .note,.hero p,.tool p,.section-head p,.about p{color:var(--muted)!important}
+.card,.tool,.item,.page,.mode,.box{background:var(--card)!important;color:var(--text)!important}
+.drop{background:var(--surface)!important;color:var(--text)!important}
+.nav a,.nav button{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
+.secondary,.ghost{background:var(--soft)!important;color:var(--text)!important}
+.danger{color:#b00000!important;background:#fff0f0!important}
+.field{background:var(--input)!important;color:var(--text)!important;border-color:var(--line)!important}
+html.dark .danger{color:#ff8b8b!important;background:#2b1112!important}
+html.dark .hero,html.dark .tools-section,html.dark .footer{background:#080808!important;color:#fff!important}
+html.dark .drop{background:#101010!important}
+html.dark .hero p,html.dark .tool p,html.dark .section-head p,html.dark .about p,html.dark .muted,html.dark .size,html.dark .note{color:#aaa!important}
+html.dark .secondary,html.dark .ghost{background:#1b1b1b!important;color:#fff!important}
+html.dark .field{background:#121212!important;color:#fff!important}
 </style></head><body><div class="topbar"><header class="wrap nav"><a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a><nav class="navlinks"><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><button class="theme" id="theme">🌙</button></nav></header></div><main><section class="hero"><div class="wrap"><span class="eyebrow"><span class="dot"></span> DOCUMENTOS • TRANSPORTE • LOGÍSTICA</span><h1>PDFs prontos para a sua <span>operação logística.</span></h1><p>Ferramentas simples para organizar, compilar e separar documentos com agilidade. Tudo direto no navegador, sem enviar seus arquivos.</p><div class="road"><span>PROCESSAMENTO LOCAL</span><span class="roadline"></span><span>RÁPIDO E SEGURO</span></div></div></section><section class="tools-section"><div class="wrap"><div class="section-head"><div><h2>Ferramentas da operação</h2><p>Escolha a ferramenta e prepare seus documentos.</p></div></div><section class="tools"><article class="tool"><div class="icon">📎</div><h3>Compilador de PDF</h3><p>Junte vários PDFs em um único arquivo e reorganize a ordem dos documentos.</p><a class="cta" href="./compilador.html">Abrir compilador →</a></article><article class="tool"><div class="icon">✂️</div><h3>Separador de PDF</h3><p>Divida documentos por páginas individuais ou crie grupos usando intervalos.</p><a class="cta" href="./separador.html">Abrir separador →</a></article></section><section class="about"><div class="about-icon">🚚</div><div><h3>Feito para a rotina logística</h3><p>O processamento acontece localmente no seu navegador. Seus documentos permanecem no seu computador durante a operação.</p></div></section></div></section></main><footer class="footer">COSTALOG PDF • Ferramentas para documentos de logística</footer><script><script>
-const savedTheme=localStorage.getItem('costalog-theme');
-const dark=savedTheme==='dark';
-document.documentElement.classList.toggle('dark',dark);
-const t=document.getElementById('theme');
-if(t){t.textContent=dark?'☀️':'🌙';t.onclick=()=>{const isDark=document.documentElement.classList.toggle('dark');localStorage.setItem('costalog-theme',isDark?'dark':'light');t.textContent=isDark?'☀️':'🌙';};}
+(function(){
+  const key='costalog-theme';
+  const root=document.documentElement;
+  const button=document.getElementById('theme');
+  const apply=mode=>{
+    const dark=mode==='dark';
+    root.classList.toggle('dark',dark);
+    localStorage.setItem(key,dark?'dark':'light');
+    if(button) button.textContent=dark?'☀️':'🌙';
+  };
+  apply(localStorage.getItem(key)==='dark'?'dark':'light');
+  if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
+})();
 </script></body></html>
