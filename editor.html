@@ -35,7 +35,7 @@ html.dark{--bg:#090909;--card:#151515;--surface:#101010;--text:#fff;--muted:#aaa
 <aside class="side">
 <h3>Páginas</h3><div id="status" class="status"></div><div id="thumbs"></div>
 </aside>
-<main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong><div id="drop" aria-label="Abrir PDF" style="position:absolute;inset:0;cursor:pointer;background:transparent;border:0"><input id="file" type="file" accept="application/pdf" hidden></div></div><div id="page" class="page" style="display:none"><div id="layer" class="layer"></div></div></main>
+<main class="canvas-area"><div id="empty" style="padding:80px 20px;text-align:center;color:var(--muted)"><strong style="display:block;color:var(--text);font-size:22px">Editor de PDF</strong></div><div id="page" class="page" style="display:none"><div id="layer" class="layer"></div></div><input id="file" type="file" accept="application/pdf" hidden></main>
 <aside class="side right">
 <div class="section"><h3>Propriedades</h3><div class="label">Texto selecionado</div><textarea id="text" class="textedit" placeholder="Clique em um texto existente ou adicionado."></textarea><div class="row"><input id="size" class="input" type="number" min="6" max="96" value="16" title="Tamanho"><button class="btn" id="bold"><b>B</b></button><button class="btn" id="del">🗑 Apagar</button></div></div>
 <div class="section"><h3>Inserir</h3><div class="row"><button class="btn" id="addText">＋ Texto</button><button class="btn" id="addField">▤ Campo</button><button class="btn" id="addCheck">☑ Checkbox</button></div><p class="help">Para texto existente, clique diretamente sobre a palavra/bloco. O editor permite substituir ou cobrir o conteúdo no PDF exportado.</p></div>
@@ -59,10 +59,12 @@ async function getPending(){try{const d=await db();return await new Promise((res
 async function clearPending(){try{const d=await db();const t=d.transaction('files','readwrite');t.objectStore('files').delete('editor')}catch{}}
 
 function wire(){
- const d=$('drop'),f=$('file');
- d.onclick=()=>f.click();d.ondragover=e=>{e.preventDefault();d.style.borderColor='var(--red)'};d.ondragleave=()=>d.style.borderColor='';
- d.ondrop=e=>{e.preventDefault();d.style.borderColor='';if(e.dataTransfer.files[0])openFile(e.dataTransfer.files[0])};
- f.onchange=e=>{if(e.target.files[0])openFile(e.target.files[0])};
+ const f=$('file');
+ const area=document.querySelector('.canvas-area');
+ area.onclick=e=>{if(e.target===area||e.target===$('empty')||e.target===$('empty').querySelector('strong'))f.click()};
+ area.ondragover=e=>{if(!$('page').style.display||$('page').style.display==='none')e.preventDefault()};
+ area.ondrop=e=>{if($('page').style.display==='none'){e.preventDefault();const file=e.dataTransfer.files[0];if(file)openFile(file)}};
+ f.onchange=e=>{if(e.target.files[0])openFile(e.target.files[0]);f.value=''};
  document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
  $('addText').onclick=()=>addText();
  $('addField').onclick=()=>addField();
