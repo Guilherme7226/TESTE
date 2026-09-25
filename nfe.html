@@ -52,7 +52,6 @@ $('consult').onclick=async()=>{
   setStatus('✓ NF-e consultada. Escolha uma opção.','ok');
  }catch(e){setStatus('Erro: '+e.message,'error')}
 };
-};
 $('drop').onclick=()=>$('xml').click();$('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('over')};$('drop').ondragleave=()=>$('drop').classList.remove('over');$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('over');const f=e.dataTransfer.files[0];if(f)readXML(f)};$('xml').onchange=e=>{if(e.target.files[0])readXML(e.target.files[0]);e.target.value=''};
 async function readXML(f){try{xmlText=await f.text();parseXML(xmlText);setStatus('✓ XML carregado e processado.','ok')}catch(e){setStatus(e.message,'error')}}
 $('pdfDownload').onclick=()=>{if(window.__nfePdfUrl){const a=document.createElement('a');a.href=window.__nfePdfUrl;a.download='DANFE-'+cleanKey($('key').value)+'.pdf';a.click()}};
