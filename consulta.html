@@ -4,26 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Status de Container | COSTALOG</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--red:#d71920;--blue:#0d6efd;--green:#168a45}
+:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--red:#d71920;--blue:#0d6efd}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
 .top{border-bottom:2px solid var(--red);padding:16px 0}.wrap{width:min(950px,92%);margin:auto}.brand{font-weight:900;font-size:21px}.brand span{color:var(--red)}
 .tabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}.tab{border:1px solid var(--line);background:var(--surface);padding:11px 16px;border-radius:9px;cursor:pointer;font-weight:800}.tab.active{background:var(--red);color:#fff;border-color:var(--red)}
 main{padding:35px 0 70px}h1{font-size:clamp(30px,6vw,48px);margin:0 0 10px}.intro{color:var(--muted);line-height:1.5}.card{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 8px 25px #0001}
-.panel{display:none}.panel.active{display:block}label{font-weight:800;display:block;margin:15px 0 7px}input,textarea{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:16px}textarea{min-height:220px;resize:vertical;font-family:monospace}.buttons{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:13px 17px;font-weight:800;cursor:pointer}.primary{background:var(--red);color:#fff}.blue{background:var(--blue);color:#fff}.gray{background:var(--surface);border:1px solid var(--line)}.green{background:var(--green);color:#fff}
-.table{margin-top:20px;border:1px solid var(--line);border-radius:10px;overflow:hidden}.row{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:12px 15px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.head{font-weight:900;background:var(--surface)}.status{font-weight:700}.whatsapp{margin-top:18px;padding:15px;background:var(--surface);border:1px solid var(--line);border-radius:9px;white-space:pre-wrap;line-height:1.5}.hidden{display:none}.msg{margin-top:18px;padding:12px;background:var(--surface);border-radius:9px;color:var(--muted)}.hint{font-size:13px;color:var(--muted);margin-top:7px}.loginbox{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:18px}.loginstate{font-weight:700}
-@media(max-width:600px){.row{grid-template-columns:1fr}.head{display:none}.buttons{flex-direction:column}.btn{width:100%}.loginbox{align-items:flex-start;flex-direction:column}}
+.panel{display:none}.panel.active{display:block}label{font-weight:800;display:block;margin:15px 0 7px}input,textarea{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:16px}textarea{min-height:220px;resize:vertical;font-family:monospace}.buttons{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:13px 17px;font-weight:800;cursor:pointer}.primary{background:var(--red);color:#fff}.blue{background:var(--blue);color:#fff}.gray{background:var(--surface);border:1px solid var(--line)}
+.table{margin-top:20px;border:1px solid var(--line);border-radius:10px;overflow:hidden}.row{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:12px 15px;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.head{font-weight:900;background:var(--surface)}.status{font-weight:700}.whatsapp{margin-top:18px;padding:15px;background:var(--surface);border:1px solid var(--line);border-radius:9px;white-space:pre-wrap;line-height:1.5}.hidden{display:none}.msg{margin-top:18px;padding:12px;background:var(--surface);border-radius:9px;color:var(--muted)}.hint{font-size:13px;color:var(--muted);margin-top:7px}
+@media(max-width:600px){.row{grid-template-columns:1fr}.head{display:none}.buttons{flex-direction:column}.btn{width:100%}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap"><div class="brand"><span>C</span> COSTALOG</div><div class="tabs"><button class="tab active" onclick="abrirAba('inicio',this)">Página de teste</button><button class="tab" onclick="abrirAba('status',this)">📋 Status de Container</button></div></div></header>
 <main><div class="wrap">
 <section id="inicio" class="panel active"><h1>Página de <span style="color:var(--red)">Teste</span></h1><p class="intro">Área de testes do projeto.</p><div class="card"><p>Use a aba <b>📋 Status de Container</b> para consultar containers pela data.</p></div></section>
-<section id="status" class="panel"><h1>Status de <span style="color:var(--red)">Container</span></h1><p class="intro">Consulta a planilha privada usando sua conta Google. Nenhum dado da planilha é publicado.</p>
+<section id="status" class="panel"><h1>Status de <span style="color:var(--red)">Container</span></h1><p class="intro">Selecione a data da coluna A e informe os containers. O sistema consulta o container na coluna T e retorna o status da coluna AY.</p>
 <div class="card">
-<div class="loginbox"><div id="loginstate" class="loginstate">🔒 Faça login com a conta que possui acesso à planilha.</div><button id="loginBtn" class="btn green" onclick="loginGoogle()">🔐 ENTRAR COM GOOGLE</button></div>
-<label for="data">📅 Data da operação</label><input id="data" type="date"><div class="hint">A data será comparada com a coluna A.</div>
+<label for="data">📅 Data da operação</label><input id="data" type="date"><div class="hint">A data será usada para filtrar a coluna A da planilha.</div>
 <label for="entrada">📦 Containers</label><textarea id="entrada" placeholder="HAMU2635788
 TCNU6894772
 MRKU6243716
@@ -32,79 +30,29 @@ KKTU8188495"></textarea>
 <div id="resultado"></div></div></section>
 </div></main>
 <script>
-const CLIENT_ID='COLOQUE_AQUI_O_CLIENT_ID_DO_GOOGLE_OAUTH';
-const SPREADSHEET_ID='1ofATkF2D1UQDsj-1Jrxi-0KSaFV-ENHM_DWQHcVqYYY';
-const RANGE='Mapa 1!A:AY';
-const SCOPE='https://www.googleapis.com/auth/spreadsheets.readonly';
-let accessToken=null,tokenClient=null,textoWhatsapp='';
-
+const API='https://script.google.com/macros/s/AKfycbxyAgJZpSXA-tZ2u5jmni49jhcAJ2T062byfXGPmLVMK8j7tRN5cfsPR6WYImFTZ3Xm/exec';
+let textoWhatsapp='';
 function abrirAba(id,botao){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');botao.classList.add('active')}
-
-function inicializarGoogle(){
- if(CLIENT_ID.startsWith('COLOQUE_')||!window.google?.accounts?.oauth2)return;
- tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPE,callback:(resp)=>{
-   if(resp.error){mostrarErro('Falha no login Google: '+resp.error);return}
-   accessToken=resp.access_token;
-   document.getElementById('loginstate').textContent='✅ Google conectado — acesso à planilha autorizado.';
-   document.getElementById('loginBtn').textContent='🔄 RENOVAR ACESSO';
- }});
-}
-window.addEventListener('load',()=>setTimeout(inicializarGoogle,500));
-
-function loginGoogle(){
- if(CLIENT_ID.startsWith('COLOQUE_')){alert('Primeiro configure o Client ID do Google OAuth no arquivo consulta.html.');return}
- if(!tokenClient)inicializarGoogle();
- if(tokenClient)tokenClient.requestAccessToken({prompt:accessToken?'':'consent'});
-}
-
-async function lerPlanilha(){
- if(!accessToken)throw new Error('Entre com sua conta Google antes de consultar.');
- const r=await fetch('https://sheets.googleapis.com/v4/spreadsheets/'+SPREADSHEET_ID+'/values/'+encodeURIComponent(RANGE),{headers:{Authorization:'Bearer '+accessToken}});
- if(r.status===401){accessToken=null;throw new Error('A autorização Google expirou. Clique em ENTRAR COM GOOGLE novamente.')}
- if(r.status===403)throw new Error('Sua conta Google não tem acesso a esta planilha ou o Google Sheets API não está habilitado.');
- if(!r.ok)throw new Error('Erro ao acessar a planilha Google.');
- const d=await r.json();return d.values||[];
-}
-
-function normalizarContainer(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
-function normalizarData(v){
- const s=String(v||'').trim();
- if(!s)return '';
- if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
- let m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
- if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
- const dt=new Date(s);if(!isNaN(dt))return dt.toISOString().slice(0,10);
- return s;
-}
-
-async function consultar(){
- const lista=document.getElementById('entrada').value.split(/[\n,;]+/).map(normalizarContainer).filter(Boolean);
+function consultar(){
+ const lista=document.getElementById('entrada').value.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
  const data=document.getElementById('data').value;
  if(!lista.length){alert('Digite pelo menos um container.');return}
  if(!data){alert('Selecione uma data.');return}
- document.getElementById('resultado').innerHTML='<div class="msg">🔎 Consultando sua planilha privada...</div>';
+ document.getElementById('resultado').innerHTML='<div class="msg">🔎 Consultando...</div>';
  document.getElementById('copiar').classList.add('hidden');
- try{
-   const rows=await lerPlanilha();
-   const mapa=new Map();
-   rows.slice(1).forEach(row=>{
-     const container=normalizarContainer(row[19]); // T
-     const dataLinha=normalizarData(row[0]);       // A
-     const status=String(row[50]??'').trim();      // AY
-     if(container&&dataLinha===data)mapa.set(container,status||'SEM STATUS');
-   });
-   const resultados=lista.map(container=>({container,status:mapa.get(container)||'NÃO ENCONTRADO'}));
-   textoWhatsapp='📋 STATUS DOS CONTAINERS\\n\\n'+resultados.map(x=>x.container+' — '+x.status).join('\\n');
-   let h='<div class="table"><div class="row head"><div>CONTAINER</div><div>STATUS</div></div>';
-   resultados.forEach(x=>h+='<div class="row"><div><b>'+esc(x.container)+'</b></div><div class="status">'+esc(x.status)+'</div></div>');
-   h+='</div><div class="whatsapp">'+esc(textoWhatsapp)+'</div>';
-   document.getElementById('resultado').innerHTML=h;
-   document.getElementById('copiar').classList.remove('hidden');
- }catch(e){document.getElementById('resultado').innerHTML='<div class="msg">❌ '+esc(e.message)+'</div>'}
+ let url=API+'?containers='+encodeURIComponent(lista.join(','))+'&date='+encodeURIComponent(data);
+ fetch(url).then(r=>r.json()).then(d=>{
+  if(!d.success)throw new Error(d.erro||'Erro na consulta');
+  textoWhatsapp=d.whatsapp;
+  let h='<div class="table"><div class="row head"><div>CONTAINER</div><div>STATUS</div></div>';
+  d.resultados.forEach(x=>h+='<div class="row"><div><b>'+esc(x.container)+'</b></div><div class="status">'+esc(x.status)+'</div></div>');
+  h+='</div><div class="whatsapp">'+esc(textoWhatsapp)+'</div>';
+  document.getElementById('resultado').innerHTML=h;
+  document.getElementById('copiar').classList.remove('hidden');
+ }).catch(e=>document.getElementById('resultado').innerHTML='<div class="msg">❌ '+esc(e.message)+'</div>')
 }
 function copiar(){navigator.clipboard.writeText(textoWhatsapp).then(()=>alert('✅ Copiado para o WhatsApp!')).catch(()=>alert('Selecione o texto e copie manualmente.'))}
 function limpar(){document.getElementById('entrada').value='';document.getElementById('data').value='';document.getElementById('resultado').innerHTML='';document.getElementById('copiar').classList.add('hidden');textoWhatsapp=''}
-function mostrarErro(s){document.getElementById('resultado').innerHTML='<div class="msg">❌ '+esc(s)+'</div>'}
 function esc(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 </script>
 </body></html>
