@@ -24,6 +24,24 @@ html.dark .nav a,html.dark .nav button{background:#121212!important;color:#fff!i
 html.dark .secondary,html.dark .ghost{background:#1b1b1b!important;color:#ddd!important}
 html.dark .danger{background:#2b1112!important;color:#ff7b7b!important}
 html.dark .field{background:#121212!important;color:#fff!important;border-color:#2b2b2b!important}
+</style><style id="costalog-theme-final">
+:root{--bg:#fff;--card:#fff;--surface:#f5f5f5;--text:#111;--muted:#666;--line:#ddd;--input:#fff;--soft:#f1f1f1}
+html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa;--line:#2b2b2b;--input:#121212;--soft:#1b1b1b}
+html,body{background:var(--bg)!important;color:var(--text)!important}
+body *{border-color:var(--line)}
+body p,body .muted,body .size,body .note,.hero p,.tool p,.section-head p,.about p{color:var(--muted)!important}
+.card,.tool,.item,.page,.mode,.box{background:var(--card)!important;color:var(--text)!important}
+.drop{background:var(--surface)!important;color:var(--text)!important}
+.nav a,.nav button{background:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important}
+.secondary,.ghost{background:var(--soft)!important;color:var(--text)!important}
+.danger{color:#b00000!important;background:#fff0f0!important}
+.field{background:var(--input)!important;color:var(--text)!important;border-color:var(--line)!important}
+html.dark .danger{color:#ff8b8b!important;background:#2b1112!important}
+html.dark .hero,html.dark .tools-section,html.dark .footer{background:#080808!important;color:#fff!important}
+html.dark .drop{background:#101010!important}
+html.dark .hero p,html.dark .tool p,html.dark .section-head p,html.dark .about p,html.dark .muted,html.dark .size,html.dark .note{color:#aaa!important}
+html.dark .secondary,html.dark .ghost{background:#1b1b1b!important;color:#fff!important}
+html.dark .field{background:#121212!important;color:#fff!important}
 </style></head><body><header class="wrap nav"><a class="brand" href="./">← COSTALOG PDF</a><div><a href="./compilador.html">📎 Compilador</a> <button id="theme">🌙</button></div></header><main class="wrap"><section class="hero"><h1>Separador de PDF</h1><p>Divida páginas individuais ou crie grupos por intervalos.</p></section><section class="card"><div id="drop" class="drop"><div class="big">✂️</div><h2>Arraste um PDF aqui</h2><p>ou escolha o arquivo no computador</p><label class="btn primary" for="file">Escolher PDF</label><input id="file" type="file" accept=".pdf,application/pdf" hidden></div><div id="work" style="display:none"><div class="filebar"><div><div class="filename" id="name"></div><span class="muted" id="info"></span></div><button class="btn ghost" id="change">Trocar PDF</button></div><div class="modes"><div class="mode active" id="each"><label><input type="radio" name="mode" value="each" checked> Uma página por arquivo</label><p>Cria um PDF separado para cada página. Você pode selecionar apenas algumas páginas abaixo.</p></div><div class="mode" id="ranges"><label><input type="radio" name="mode" value="ranges"> Separar por intervalos</label><p>Exemplo: 1-3, 4-7, 8</p><input id="rangeText" class="field" placeholder="1-3, 4-7, 8"></div></div><div class="head" style="margin-top:20px"><strong>Páginas</strong><span class="muted" id="selected">0 selecionada(s)</span></div><div id="grid" class="grid"></div><div class="progress" id="progress"><div id="bar"></div></div><div class="footer"><span class="muted" id="status">Processamento local.</span><button class="btn primary" id="split">✂️ Separar e baixar ZIP</button></div></div></section></main><script>
 const {PDFDocument}=PDFLib;let file,pdf,total;const $=id=>document.getElementById(id);const s=localStorage.getItem('costalog-theme');document.documentElement.classList.add('dark');$('theme').textContent=s==='dark'?'☀️':'🌙';$('theme').onclick=()=>{const d=document.documentElement.classList.toggle('dark');localStorage.setItem('costalog-theme','dark');$('theme').textContent=d?'☀️':'🌙'};
 async function load(f){if(!f||!(f.type==='application/pdf'||/\.pdf$/i.test(f.name)))return;try{file=f;pdf=await PDFDocument.load(await f.arrayBuffer());total=pdf.getPageCount();$('drop').style.display='none';$('work').style.display='block';$('name').textContent=f.name;$('info').textContent=total+' páginas';await render()}catch(e){alert('Não foi possível abrir este PDF.')}}
@@ -32,9 +50,17 @@ function update(){$('selected').textContent=document.querySelectorAll('.page.sel
 function parse(s){const a=[];for(const x of s.split(',').map(x=>x.trim()).filter(Boolean)){const m=x.match(/^(\d+)\s*-\s*(\d+)$/);if(/^\d+$/.test(x)){let n=+x;if(n<1||n>total)throw Error('Página inválida: '+x);a.push([n,n])}else if(m&&+m[1]>=1&&+m[2]<=total&&+m[1]<=+m[2])a.push([+m[1],+m[2]]);else throw Error('Intervalo inválido: '+x)}if(!a.length)throw Error('Informe os intervalos.');return a}
 $('split').onclick=async()=>{try{let groups,mode=document.querySelector('input[name=mode]:checked').value;if(mode==='each'){const sel=[...document.querySelectorAll('.page.selected')].map(x=>+x.dataset.p);groups=(sel.length?sel:Array.from({length:total},(_,i)=>i+1)).map(n=>[n,n])}else groups=parse($('rangeText').value);$('progress').style.display='block';const zip=new JSZip(),base=file.name.replace(/\.pdf$/i,'');for(let i=0;i<groups.length;i++){const [a,b]=groups[i],out=await PDFDocument.create(),pages=await out.copyPages(pdf,Array.from({length:b-a+1},(_,j)=>a+j-1));pages.forEach(p=>out.addPage(p));zip.file(base+'-'+(a===b?'pagina-'+a:'paginas-'+a+'-'+b)+'.pdf',await out.save());$('bar').style.width=((i+1)/groups.length*90)+'%'}const u=URL.createObjectURL(await zip.generateAsync({type:'blob'})),a=document.createElement('a');a.href=u;a.download=base+'-separado.zip';a.click();URL.revokeObjectURL(u);$('bar').style.width='100%';$('status').textContent=groups.length+' arquivo(s) criado(s).'}catch(e){$('status').textContent=e.message||'Erro ao separar.'}finally{setTimeout(()=>$('progress').style.display='none',900)}};
 </script><script>
-const savedTheme=localStorage.getItem('costalog-theme');
-const dark=savedTheme==='dark';
-document.documentElement.classList.toggle('dark',dark);
-const t=document.getElementById('theme');
-if(t){t.textContent=dark?'☀️':'🌙';t.onclick=()=>{const isDark=document.documentElement.classList.toggle('dark');localStorage.setItem('costalog-theme',isDark?'dark':'light');t.textContent=isDark?'☀️':'🌙';};}
+(function(){
+  const key='costalog-theme';
+  const root=document.documentElement;
+  const button=document.getElementById('theme');
+  const apply=mode=>{
+    const dark=mode==='dark';
+    root.classList.toggle('dark',dark);
+    localStorage.setItem(key,dark?'dark':'light');
+    if(button) button.textContent=dark?'☀️':'🌙';
+  };
+  apply(localStorage.getItem(key)==='dark'?'dark':'light');
+  if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
+})();
 </script></body></html>
