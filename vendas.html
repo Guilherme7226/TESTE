@@ -25,7 +25,7 @@
 </div>
 </div>
 <script>
-const URL_WEB_APP = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnSGpf3cB9WJ3CrU2hTbFQBmE2JqWo0e-AtSTu44LwRUN7IW3hQIbqI999w34oX_cx2FxfYt9xffodX80Nrzav6uB7RsexmvE3yPqp1CHhKRrtM2EUV3Kz_k7AAy0puJkg7A--kmHblg6T6KH9Y-3QExsWmAkP6fgRPNZpeVVHGGCx4QSxdNNxQ5_1gEQgQOvqPg5oF50PY9Bh7o6qtWGZeNcWVt6Qma6jE3EgGL--5pkdMrffJtuaypqloyjTieRRkS9jxCa5EgNCfCK6LdiE76efM9LQ&lib=M_l_9t0ziuJkJV2Egh9HvOL_cs2Tzvz2N";
+const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby7jjjQ1DOlio9ZUMkbqk4_9_3Tltw_kjVEX-CTBKeUCUy8IuQDiRkCrRlh5bngpm04/exec";
 const VALOR_UNITARIO = 8.00;
 function calcularTotal(){const qtd=Math.max(0,Number(document.getElementById('qtd').value)||0);document.getElementById('valorTotal').textContent=(qtd*VALOR_UNITARIO).toFixed(2).replace('.',',');}
 async function enviarVenda(){
@@ -33,7 +33,7 @@ async function enviarVenda(){
  if(!cliente){msg.style.color='#c62828';msg.textContent='Informe o nome do cliente.';return}
  if(!Number.isInteger(qtd)||qtd<1){msg.style.color='#c62828';msg.textContent='Informe uma quantidade válida.';return}
  btn.disabled=true;msg.style.color='#666';msg.textContent='Registrando...';
- const url=URL_WEB_APP+'&acao=venda&cliente='+encodeURIComponent(cliente)+'&qtd='+encodeURIComponent(qtd);
+ const url=URL_WEB_APP+'?acao=venda&cliente='+encodeURIComponent(cliente)+'&qtd='+encodeURIComponent(qtd);
  try{const response=await fetch(url);if(!response.ok)throw new Error('HTTP '+response.status);await response.text();msg.style.color='#2e7d32';msg.textContent='✅ Venda registrada com sucesso!';document.getElementById('cliente').value='';document.getElementById('qtd').value='1';calcularTotal();}
  catch(error){msg.style.color='#c62828';msg.textContent='Erro ao registrar. Verifique o Google Apps Script.';}
  finally{btn.disabled=false}
