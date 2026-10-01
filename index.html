@@ -19,10 +19,18 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 .nfe-wide{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:18px}.nfe-wide p{min-height:0;margin:0}.nfe-wide form{display:flex;gap:8px;align-items:center;min-width:0}.nfe-wide .track-input{flex:1;width:100%;min-width:0;box-sizing:border-box}.nfe-wide .track-btn{width:auto;margin:0;white-space:nowrap}.nfe-wide .status{position:absolute;margin-top:70px}.about{margin-top:20px;border-left:5px solid var(--red);border-radius:12px;padding:20px;background:var(--surface);color:var(--text)}.about p{color:var(--muted);margin:5px 0 0;line-height:1.5}.footer{border-top:2px solid var(--red);padding:23px 0;text-align:center;color:var(--muted);font-size:12px}
 @media(max-width:850px){.tools{grid-template-columns:1fr}.nfe-wide{grid-column:auto;display:block}.nfe-wide form{display:block}.nfe-wide .track-btn{width:100%;margin-top:9px}.nfe-wide .status{position:static;margin-top:10px}.tool>p{min-height:0}.navlinks a{display:none}}@media(max-width:500px){.hero{padding:42px 0}.hero h1{letter-spacing:-2px}.track-grid{grid-template-columns:1fr}}
 </style>
-</head>
+<style>
+/* Navegação das ferramentas */
+.topbar .nav{height:auto;min-height:76px;flex-wrap:wrap;padding:14px 0;gap:14px}
+.topbar .navlinks{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;gap:5px;padding:5px;background:var(--surface,#f5f5f5);border:1px solid var(--line,#ddd);border-radius:12px}
+.topbar .navlinks a{display:block!important;border:0;padding:10px 14px;border-radius:8px;font-size:13px;white-space:nowrap;background:transparent}
+.topbar .navlinks a[aria-current="page"]{background:var(--red,#d71920);color:#fff;box-shadow:0 3px 9px #d7192025}
+.topbar .navlinks .theme{flex-shrink:0}
+@media(max-width:850px){.topbar .navlinks{width:100%;max-width:100%;}.topbar .brand small{display:block}.topbar .navlinks a{display:block!important}}
+</style></head>
 <body>
 <header class="topbar"><div class="wrap nav">
-<a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a>
+<a  class="brand" href="./" aria-current="page"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a>
 <nav class="navlinks"><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><a href="./container.html">🚢 Container</a><a href="./nfe.html">🧾 NF-e / DANFE</a><button class="theme" id="theme">🌙</button></nav>
 </div></header>
 
