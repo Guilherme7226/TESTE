@@ -27,12 +27,9 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 .topbar .navlinks a[aria-current="page"]{background:var(--red,#d71920);color:#fff;box-shadow:0 3px 9px #d7192025}
 .topbar .navlinks .theme{flex-shrink:0}
 @media(max-width:850px){.topbar .navlinks{width:100%;max-width:100%;}.topbar .brand small{display:block}.topbar .navlinks a{display:block!important}}
-</style></head>
+</style><link rel="stylesheet" href="./navigation.css?v=2"><script src="./navigation.js?v=2" defer></script></head>
 <body>
-<header class="topbar"><div class="wrap nav">
-<a  class="brand" href="./" aria-current="page"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a>
-<nav class="navlinks"><a href="./compilador.html">📎 Compilador</a><a href="./separador.html">✂️ Separador</a><a href="./container.html">🚢 Container</a><a href="./nfe.html">🧾 NF-e / DANFE</a><button class="theme" id="theme">🌙</button></nav>
-</div></header>
+<button id="sidebarToggle" class="sidebar-mobile" aria-expanded="false" aria-controls="toolSidebar" type="button">☰ COSTALOG <span>Ferramentas</span></button><button id="sidebarShade" class="sidebar-shade" tabindex="-1" aria-label="Fechar menu" type="button"></button><aside id="toolSidebar" class="costalog-sidebar"><button id="sidebarClose" class="sidebar-close" aria-label="Fechar menu" type="button">×</button><a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a><div><p class="sidebar-caption">SUAS FERRAMENTAS</p><nav aria-label="Ferramentas"><a href="./index.html" aria-current="page"><span class="sidebar-icon" aria-hidden="true">⌂</span>Início</a><a href="./compilador.html"><span class="sidebar-icon" aria-hidden="true">▤</span>Compilador de PDF</a><a href="./separador.html"><span class="sidebar-icon" aria-hidden="true">✂</span>Separador de PDF</a><a href="./comprimir.html"><span class="sidebar-icon" aria-hidden="true">⇣</span>Comprimir PDF</a><a href="./container.html"><span class="sidebar-icon" aria-hidden="true">▱</span>Tracking de Container</a><a href="./nfe.html"><span class="sidebar-icon" aria-hidden="true">▧</span>NF-e / DANFE</a></nav></div><div class="sidebar-bottom"><span>Documentos & logística</span><button id="theme" class="theme" type="button" aria-label="Alternar tema claro e escuro">🌙</button></div></aside>
 
 <section class="hero"><div class="wrap">
 <span class="eyebrow"><span class="dot"></span> DOCUMENTOS • TRANSPORTE • LOGÍSTICA</span>
@@ -55,6 +52,8 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
 <p>Separe um PDF em arquivos individuais, uma página por arquivo, e baixe tudo em ZIP.</p>
 <a class="cta" href="./separador.html">Abrir separador →</a>
 </article>
+
+<article class="tool"><div class="icon">⇣</div><h3>Comprimir PDF</h3><p>Reduza o tamanho do PDF priorizando a qualidade das imagens e preservando os textos.</p><a class="cta" href="./comprimir.html">Comprimir PDF →</a></article>
 
 <article class="tool">
 <div class="icon">🚢</div><h3>Tracking de Container</h3>
@@ -93,5 +92,5 @@ html.dark{--bg:#080808;--card:#121212;--surface:#101010;--text:#fff;--muted:#aaa
   if(button) button.addEventListener('click',()=>apply(root.classList.contains('dark')?'light':'dark'));
 })();
 const nfeForm=document.getElementById('homeNfeForm');
-if(nfeForm){const nk=document.getElementById('homeNfeKey'),ns=document.getElementById('homeNfeStatus');nk.oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,44).replace(/(.{4})/g,'$1 ').trim();nfeForm.onsubmit=e=>{e.preventDefault();const k=nk.value.replace(/\D/g,'');if(k.length!==44){ns.textContent='A chave precisa ter 44 dígitos.';ns.className='status error';return}location.href='./nfe.html?chave='+encodeURIComponent(k)}}}</script></body>
+if(nfeForm){const nk=document.getElementById('homeNfeKey'),ns=document.getElementById('homeNfeStatus');nk.oninput=e=>e.target.value=e.target.value.replace(/\D/g,'').slice(0,44).replace(/(.{4})/g,'$1 ').trim();nfeForm.onsubmit=e=>{e.preventDefault();const k=nk.value.replace(/\D/g,'');if(k.length!==44){ns.textContent='A chave precisa ter 44 dígitos.';ns.className='status error';return}location.href='./nfe.html?chave='+encodeURIComponent(k)}}</script></body>
 </html>
