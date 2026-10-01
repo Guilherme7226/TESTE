@@ -1,40 +1,10 @@
-name: Deploy COSTALOG Worker
+name: Deploy COSTALOG Worker (legacy)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "worker.js"
-      - ".github/workflows/deploy-worker.yml"
   workflow_dispatch:
 
 jobs:
-  deploy:
+  info:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Deploy Worker via Cloudflare API
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          RESPONSE_FILE="$(mktemp)"
-          HTTP_CODE="$(
-            curl --silent --show-error               --output "$RESPONSE_FILE"               --write-out "%{http_code}"               --request PUT               "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/costalog-tools"               --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN"               --form 'metadata={"main_module":"worker.js","compatibility_date":"2026-10-01"};type=application/json'               --form 'worker.js=@worker.js;type=application/javascript+module'
-          )"
-          cat "$RESPONSE_FILE"
-          echo
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "Cloudflare deploy failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
-          if ! grep -q '"success":true' "$RESPONSE_FILE"; then
-            echo "Cloudflare API did not report success."
-            exit 1
-          fi
-          echo "Worker costalog-tools deployed successfully."
+      - run: echo "Automatic Worker deploy is handled by Cloudflare Git integration."
