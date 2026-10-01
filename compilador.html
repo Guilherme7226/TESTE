@@ -29,7 +29,7 @@ main{padding:58px 0 70px}.hero{margin-bottom:24px}.eyebrow{display:inline-flex;p
 @media(max-width:850px){.topbar .navlinks{width:100%;max-width:100%;}.topbar .brand small{display:block}.topbar .navlinks a{display:block!important}}
 </style><style>
 .wrap{width:min(1280px,94%)}main{padding:30px 0 50px}.hero h1{font-size:clamp(30px,4vw,44px)}.hero p{margin-bottom:0}.card{padding:22px}.grid{min-height:240px;max-height:65vh;padding:18px;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;user-select:none;touch-action:pan-y}.page{user-select:none}.page img{pointer-events:none}.page.selected{box-shadow:0 0 0 2px var(--red);border-width:1px}.selection-box{position:fixed;border:1px solid var(--red);background:#d7192022;pointer-events:none;z-index:90}.head{flex-wrap:wrap}.page:focus-visible{outline:3px solid var(--red);outline-offset:3px}
-</style><link rel="stylesheet" href="./navigation.css?v=2"><script src="./navigation.js?v=2" defer></script></head>
+</style><link rel="stylesheet" href="./navigation.css?v=2"><script src="./navigation.js?v=2" defer></script><link rel="stylesheet" href="./pdf-workspace.css?v=1"><script src="./pdf-workspace.js?v=1"></script></head>
 <body>
 <button id="sidebarToggle" class="sidebar-mobile" aria-expanded="false" aria-controls="toolSidebar" type="button">☰ COSTALOG <span>Ferramentas</span></button><button id="sidebarShade" class="sidebar-shade" tabindex="-1" aria-label="Fechar menu" type="button"></button><aside id="toolSidebar" class="costalog-sidebar"><button id="sidebarClose" class="sidebar-close" aria-label="Fechar menu" type="button">×</button><a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a><div><p class="sidebar-caption">SUAS FERRAMENTAS</p><nav aria-label="Ferramentas"><a href="./index.html"><span class="sidebar-icon" aria-hidden="true">⌂</span>Início</a><a href="./compilador.html" aria-current="page"><span class="sidebar-icon" aria-hidden="true">▤</span>Compilador de PDF</a><a href="./separador.html"><span class="sidebar-icon" aria-hidden="true">✂</span>Separador de PDF</a><a href="./comprimir.html"><span class="sidebar-icon" aria-hidden="true">⇣</span>Comprimir PDF</a><a href="./container.html"><span class="sidebar-icon" aria-hidden="true">▱</span>Tracking de Container</a><a href="./nfe.html"><span class="sidebar-icon" aria-hidden="true">▧</span>NF-e / DANFE</a></nav></div><div class="sidebar-bottom"><span>Documentos & logística</span><button id="theme" class="theme" type="button" aria-label="Alternar tema claro e escuro">🌙</button></div></aside>
 
@@ -88,23 +88,35 @@ $('fileInput').onchange=async e=>{await adicionarArquivos(e.target.files);e.targ
 $('addMore').onclick=()=>$('fileInput').click();
 
 async function adicionarArquivos(files){
- if(!files||!files.length)return;
- $('drop').style.display='none';$('work').style.display='block';
- for(const file of files){
-  try{
-   const sourceId='f_'+Math.random().toString(36).slice(2);
-   const arrayBuffer=await file.arrayBuffer();
-   const pdfDoc=await pdfjsLib.getDocument({data:arrayBuffer.slice(0)}).promise;
-   for(let i=1;i<=pdfDoc.numPages;i++){
-    const page=await pdfDoc.getPage(i),viewport=page.getViewport({scale:.3});
-    const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-    canvas.width=viewport.width;canvas.height=viewport.height;
-    await page.render({canvasContext:ctx,viewport}).promise;
-    paginas.push({id:'p_'+Math.random().toString(36).slice(2),fileName:file.name,sourceId,arrayBuffer,pageNumber:i,rotation:0,dataUrl:canvas.toDataURL(),selected:false});
-   }
-  }catch(err){console.error(err);alert('Erro ao ler o ficheiro: '+file.name)}
- }
- atualizar();
+ const incoming=Array.from(files||[]);if(!incoming.length||PDFWorkspace.busy)return;
+ const valid=incoming.filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+ if(!valid.length){alert('Selecione arquivos PDF.');return}
+ PDFWorkspace.start('Carregando PDFs…');const errors=[];
+ try{
+  await PDFWorkspace.paint();
+  for(let index=0;index<valid.length;index++){
+   const file=valid[index];let pdfDoc;
+   try{
+    PDFWorkspace.progress('Arquivo '+(index+1)+' de '+valid.length+' • '+file.name);
+    await PDFWorkspace.paint();
+    const sourceId='f_'+Math.random().toString(36).slice(2),arrayBuffer=await file.arrayBuffer();
+    pdfDoc=await pdfjsLib.getDocument({data:arrayBuffer.slice(0)}).promise;const added=[];
+    for(let i=1;i<=pdfDoc.numPages;i++){
+     PDFWorkspace.progress(file.name+' • Página '+i+' de '+pdfDoc.numPages,100*(index+(i-1)/pdfDoc.numPages)/valid.length);
+     const page=await pdfDoc.getPage(i),viewport=page.getViewport({scale:Math.min(.5,200/page.getViewport({scale:1}).height)});
+     const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=viewport.width;canvas.height=viewport.height;
+     await page.render({canvasContext:ctx,viewport}).promise;
+     added.push({id:'p_'+Math.random().toString(36).slice(2),fileName:file.name,sourceId,arrayBuffer,pageNumber:i,rotation:0,dataUrl:canvas.toDataURL(),selected:false});
+     page.cleanup();canvas.width=canvas.height=1;
+     if(i%5===0)await PDFWorkspace.paint();
+    }
+    paginas.push(...added);
+   }catch(err){console.error(err);errors.push(file.name)}finally{if(pdfDoc)await pdfDoc.destroy()}
+  }
+  atualizar();if(paginas.length){$('drop').style.display='none';$('work').style.display='block'}
+  PDFWorkspace.progress('Páginas prontas.',100);await PDFWorkspace.paint();
+ }finally{PDFWorkspace.finish()}
+ if(errors.length)alert('Não foi possível abrir: '+errors.join(', ')+'. Verifique se os PDFs estão válidos e sem senha.');
 }
 
 function atualizar(){
@@ -119,13 +131,13 @@ function atualizar(){
   const card=document.createElement('div');card.className='page'+(p.selected?' selected':'');card.dataset.id=p.id;
   card.tabIndex=0;card.setAttribute('role','checkbox');card.setAttribute('aria-label',p.fileName+' página '+p.pageNumber);
   card.onclick=e=>{if(suppressClick){return}p.selected=!p.selected;syncSelection()};
-  card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();p.selected=!p.selected;syncSelection()}};
+  card.onkeydown=e=>{if(e.target!==card)return;if(e.key===' '||e.key==='Enter'){e.preventDefault();p.selected=!p.selected;syncSelection()}};
   const img=document.createElement('img');img.src=p.dataUrl;img.style.width='100%';img.style.height='185px';img.style.objectFit='contain';img.style.background='#fff';img.style.borderRadius='5px';img.style.transform='rotate('+p.rotation+'deg)';
   const check=document.createElement('div');check.className='check';check.textContent='✓';
-  const zoom=document.createElement('button');zoom.className='zoom';zoom.type='button';zoom.title='Visualizar página';zoom.textContent='🔍';
+  const zoom=document.createElement('button');zoom.className='zoom';zoom.type='button';zoom.title='Visualizar página';zoom.setAttribute('aria-label','Visualizar página '+p.pageNumber);zoom.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6M10.5 7.5v6"/></svg>';
   zoom.onclick=async e=>{e.stopPropagation();await abrirPreview(p)};
   const span=document.createElement('span');span.textContent=p.fileName+' • Pág. '+p.pageNumber;
-  img.draggable=false;card.append(img,check,zoom,span);$('grid').appendChild(card);card.setAttribute('aria-checked',String(p.selected));
+  const thumb=document.createElement('div');thumb.className='thumb';img.draggable=false;thumb.append(img,zoom);card.append(thumb,check,span);$('grid').appendChild(card);card.setAttribute('aria-checked',String(p.selected));
  });
 }
 
@@ -212,9 +224,7 @@ $('download').onclick=async()=>{
  }catch(err){console.error(err);$('status').textContent='Erro ao gerar o PDF.';alert('Ocorreu um erro ao gerar o PDF final.')}
 };
 
-document.addEventListener('dragover',e=>{if(isFileDrag(e)){e.preventDefault();$('drop').classList.add('over')}});
-document.addEventListener('dragleave',e=>{if(e.relatedTarget===null)$('drop').classList.remove('over')});
-document.addEventListener('drop',async e=>{if(isFileDrag(e)){e.preventDefault();$('drop').classList.remove('over');await adicionarArquivos(e.dataTransfer.files)}});
+PDFWorkspace.bindFiles({zone:$('drop'),onFiles:adicionarArquivos});
 
 (function(){
  const key='costalog-theme',root=document.documentElement,button=$('theme');
@@ -228,3 +238,4 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharPreview()});
 </script>
 </body>
 </html>
+
