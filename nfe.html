@@ -45,7 +45,7 @@ $('consult').onclick=async()=>{
  setStatus('Consultando NF-e...');
  try{
   await PDFWorkspace.paint();
-  const r=await fetch('https://consultadanfe.com/api/v1/consulta',{
+  const r=await fetch('https://costalog-tools.mgpz.workers.dev/nfe',{
    method:'POST',
    headers:{'Content-Type':'application/json','Accept':'application/json'},
    body:JSON.stringify({chave:k,format:'json'})
