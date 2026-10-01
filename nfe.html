@@ -15,7 +15,7 @@
 </style><link rel="stylesheet" href="./navigation.css?v=2"><script src="./navigation.js?v=2" defer></script><link rel="stylesheet" href="./pdf-workspace.css?v=2"><script src="./pdf-workspace.js?v=2"></script><link rel="stylesheet" href="./tool-layout.css?v=1"></head><body>
 <button id="sidebarToggle" class="sidebar-mobile" aria-expanded="false" aria-controls="toolSidebar" type="button">☰ COSTALOG <span>Ferramentas</span></button><button id="sidebarShade" class="sidebar-shade" tabindex="-1" aria-label="Fechar menu" type="button"></button><aside id="toolSidebar" class="costalog-sidebar"><button id="sidebarClose" class="sidebar-close" aria-label="Fechar menu" type="button">×</button><a class="brand" href="./"><span class="mark">C</span><span><strong>COSTALOG</strong><small>A LOGÍSTICA IDEAL</small></span></a><div><p class="sidebar-caption">SUAS FERRAMENTAS</p><nav aria-label="Ferramentas"><a href="./index.html"><span class="sidebar-icon" aria-hidden="true">⌂</span>Início</a><a href="./compilador.html"><span class="sidebar-icon" aria-hidden="true">▤</span>Compilador de PDF</a><a href="./separador.html"><span class="sidebar-icon" aria-hidden="true">✂</span>Separador de PDF</a><a href="./comprimir.html"><span class="sidebar-icon" aria-hidden="true">⇣</span>Comprimir PDF</a><a href="./container.html"><span class="sidebar-icon" aria-hidden="true">▱</span>Tracking de Container</a><a href="./nfe.html" aria-current="page"><span class="sidebar-icon" aria-hidden="true">▧</span>NF-e / DANFE</a></nav></div><div class="sidebar-bottom"><span>Documentos & logística</span><button id="theme" class="theme" type="button" aria-label="Alternar tema claro e escuro">🌙</button></div></aside>
 <main class="wrap"><section class="hero"><span class="eyebrow"><span class="dot"></span> NF-e / DANFE</span><h1>Consulte sua <span>NF-e</span> e gere o DANFE.</h1><p>Consulte pela chave de acesso ou carregue o XML da nota fiscal.</p></section>
-<section class="box"><div class="label">CHAVE DE ACESSO — 44 DÍGITOS</div><input id="key" class="key" maxlength="54" inputmode="numeric" placeholder="Ex.: 3526 ................................."><div class="row"><button class="btn primary" id="consult">🔎 Consultar na SEFAZ</button><button class="btn" id="clear">Limpar</button></div><div style="margin-top:10px;color:var(--muted);font-size:12px">Consulta gratuita via Consulta DANFE. Pela chave, aceita NF-e modelo 55 do mês atual (e do mês anterior quando hoje for antes do dia 15). Para notas antigas, carregue o XML abaixo.</div><div id="status" class="status"></div></section>
+<section class="box"><div class="label">CHAVE DE ACESSO — 44 DÍGITOS</div><input id="key" class="key" maxlength="54" inputmode="numeric" autocomplete="off" autofocus placeholder="Bipe ou digite a chave de acesso de 44 dígitos"><div class="row"><button class="btn primary" id="consult">🔎 Consultar na SEFAZ</button><button class="btn" id="clear">Limpar</button></div><div style="margin-top:10px;color:var(--muted);font-size:12px">Consulta gratuita via Consulta DANFE. Pela chave, aceita NF-e modelo 55 do mês atual (e do mês anterior quando hoje for antes do dia 15). Para notas antigas, carregue o XML abaixo.</div><div id="status" class="status"></div></section>
 <section class="box"><div class="label">OU CARREGUE O XML</div><div id="drop" class="drop"><strong>📄 Arraste o XML para cá</strong><small>ou clique para pesquisar no PC</small><input id="xml" type="file" accept=".xml,text/xml"></div></section>
 <section id="result" class="box result"><h2 style="margin-top:0">Dados da NF-e</h2><div id="grid" class="grid"></div><div id="products" class="products"></div><div class="row"><button class="btn primary" id="pdf">📄 Gerar DANFE / PDF</button><button class="btn" id="downloadXml">⬇️ Baixar XML</button></div></section>
 </main>
@@ -24,12 +24,24 @@
 <div class="modal-key" id="modalKey"></div>
 <div class="modal-section"><strong>📄 DANFE PDF</strong><div class="modal-actions"><button class="btn primary" id="pdfDownload">Baixar</button><button class="btn" id="pdfView">Visualizar</button></div></div>
 <div class="modal-section"><strong>🧾 DANFE XML</strong><div class="modal-actions"><button class="btn primary" id="xmlDownload">Baixar XML</button></div></div>
+<div class="modal-section"><strong>📋 DADOS DA NF-e</strong><div class="modal-actions"><button class="btn" id="viewData">Ver dados da nota</button></div></div>
 <button class="btn modal-close" id="modalClose">Fechar</button>
 </div></div>
 <script>
 (()=>{const $=id=>document.getElementById(id),key='costalog-theme',root=document.documentElement;const apply=d=>{root.classList.toggle('dark',d);localStorage.setItem(key,d?'dark':'light');$('theme').textContent=d?'☀️':'🌙'};apply(localStorage.getItem(key)==='dark');$('theme').onclick=()=>apply(!root.classList.contains('dark'));
 let data=null,xmlText='';
-function cleanKey(v){return v.replace(/\D/g,'').slice(0,44)}$('key').oninput=e=>e.target.value=cleanKey(e.target.value).replace(/(.{4})/g,'$1 ').trim();
+function cleanKey(v){return v.replace(/\D/g,'').slice(0,44)}
+$('key').oninput=e=>{
+ const digits=cleanKey(e.target.value);
+ e.target.value=digits.replace(/(.{4})/g,'$1 ').trim();
+};
+$('key').addEventListener('keydown',e=>{
+ if(e.key!=='Enter')return;
+ e.preventDefault();
+ const k=cleanKey(e.currentTarget.value);
+ if(k.length!==44){setStatus('A chave precisa ter 44 dígitos.','error');return}
+ $('consult').click();
+});
 const initialKey=new URLSearchParams(location.search).get('chave');if(initialKey){$('key').value=cleanKey(initialKey).replace(/(.{4})/g,'$1 ').trim();setTimeout(()=>$('consult').click(),250);}
 function setStatus(t,cls=''){$('status').textContent=t;$('status').className='status '+cls}
 function val(doc,tag){const e=doc.getElementsByTagName(tag)[0];return e?.textContent?.trim()||''}
@@ -60,7 +72,13 @@ $('consult').onclick=async()=>{
    else if(errorCode==='nao_encontrada')message='NF-e não encontrada na SEFAZ. Confira a chave e tente novamente em alguns minutos.';
    else if(errorCode==='pendente'||r.status===202)message='A NF-e ainda está pendente de autorização. Tente novamente mais tarde.';
    else if(errorCode==='servico_indisponivel'||r.status===503)message='A SEFAZ/serviço está temporariamente indisponível. Tente novamente em alguns minutos.';
-   else if(r.status===429)message='Limite gratuito de consultas atingido.'+(retryAfter?' Tente novamente em '+retryAfter+' segundos.':' Aguarde um pouco e tente novamente.');
+   else if(r.status===429){
+    if(retryAfter){
+      const sec=Number(retryAfter)||0,h=Math.floor(sec/3600),m=Math.ceil((sec%3600)/60);
+      const tempo=h?(h+'h '+m+'min'):(m+' min');
+      message='Limite temporário da API atingido. Nova tentativa em aproximadamente '+tempo+'.';
+    }else message='Limite temporário da API atingido. Aguarde um pouco e tente novamente.';
+   }
    throw Error(message);
   }
   if(!j.pdf_base64||!j.xml_base64)throw Error('A consulta não retornou o DANFE PDF e o XML.');
@@ -92,7 +110,11 @@ async function readXML(f){if(PDFWorkspace.busy)return;if(!/\.xml$/i.test(f.name)
 $('pdfDownload').onclick=()=>{if(window.__nfePdfUrl){const a=document.createElement('a');a.href=window.__nfePdfUrl;a.download='DANFE-'+cleanKey($('key').value)+'.pdf';a.click()}};
 $('pdfView').onclick=()=>{if(window.__nfePdfUrl)window.open(window.__nfePdfUrl,'_blank','noopener,noreferrer')};
 $('xmlDownload').onclick=()=>{if(window.__nfeXmlUrl){const a=document.createElement('a');a.href=window.__nfeXmlUrl;a.download='NF-e-'+cleanKey($('key').value)+'.xml';a.click()}};
-$('modalClose').onclick=()=>{$('nfeModal').classList.remove('show');$('nfeModal').setAttribute('aria-hidden','true')};
+$('viewData').onclick=()=>{
+ $('nfeModal').classList.remove('show');$('nfeModal').setAttribute('aria-hidden','true');
+ $('result').scrollIntoView({behavior:'smooth',block:'start'});
+};
+$('modalClose').onclick=()=>{$('nfeModal').classList.remove('show');$('nfeModal').setAttribute('aria-hidden','true');$('key').focus()};
 $('nfeModal').onclick=e=>{if(e.target===$('nfeModal'))$('modalClose').click()};
 $('downloadXml').onclick=()=>{if(!xmlText)return setStatus('O XML original não foi carregado.','error');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([xmlText],{type:'application/xml'}));a.download='NF-e.xml';a.click()};
 $('pdf').onclick=async()=>{if(!data)return;const out=await PDFLib.PDFDocument.create(),font=await out.embedFont(PDFLib.StandardFonts.Helvetica),bold=await out.embedFont(PDFLib.StandardFonts.HelveticaBold);const p=out.addPage([595,842]);let y=800;const line=(label,value)=>{p.drawText(label+':',{x:35,y,size:9,font:bold});p.drawText(String(value||'-').slice(0,90),{x:125,y,size:9,font});y-=18};p.drawText('DANFE — DOCUMENTO AUXILIAR DA NF-e',{x:35,y,size:14,font:bold});y-=30;line('Chave',data.chave);line('Número',data.numero);line('Série',data.serie);line('Emissão',data.data);line('Emitente',data.emitente);line('CNPJ',data.cnpjEmit);line('Destinatário',data.destinatario);line('Documento',data.docDest);line('Valor total',data.valor);y-=10;p.drawText('PRODUTOS',{x:35,y,size:11,font:bold});y-=20;for(const pr of data.produtos){if(y<45){p.addPage([595,842]);y=800}p.drawText((pr.nome||'-').slice(0,55),{x:35,y,size:8,font});p.drawText('Qtd: '+(pr.qtd||'-'),{x:350,y,size:8,font});p.drawText('R$ '+(pr.valor||'-'),{x:440,y,size:8,font});y-=14}const bytes=await out.save();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));a.download='DANFE-NFe.pdf';a.click()};
