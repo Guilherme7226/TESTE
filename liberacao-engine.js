@@ -4,6 +4,8 @@
  const months=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
  window.generateReleasePDF=async function(brand,values){
   if(!['crc','ideal'].includes(brand))throw Error('Selecione CRC ou IDEALLOG.');
+  const cidade=String(values.cidade||'').trim().replace(/\s+/g,' ');
+  if(!cidade)throw Error('Informe a cidade da liberação.');
   const quantidade=String(values.quantidade||'').trim().toUpperCase();
   const tipo=String(values.tipo||'').trim().toUpperCase();
   if(!/^\d+X?$/.test(quantidade)||!/[1-9]/.test(quantidade))throw Error('Informe a quantidade, por exemplo 1X.');
@@ -14,7 +16,7 @@
   const bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
   const fonts={regular,bold,arial:regular};
   const [year,month,day]=values.data.split('-').map(Number);if(!year||!month||!day)throw Error('Informe a data da liberação.');
-  const data={...values,quantidade:quantidade.replace(/X$/,'')+'X'+tipo,data:'Santos, '+day+' de '+months[month-1]+' de '+year,terminal:'A '+values.terminal.replace(/^[AÀ]\s+/i,'').trim().toUpperCase()};
+  const data={...values,quantidade:quantidade.replace(/X$/,'')+'X'+tipo,data:cidade+', '+day+' de '+months[month-1]+' de '+year,terminal:'A '+values.terminal.replace(/^[AÀ]\s+/i,'').trim().toUpperCase()};
   const page=doc.getPages()[0];
   for(const [key,field] of Object.entries(config[brand].fields)){
    const value=String(data[key]||'').trim().replace(/\s+/g,' ');if(!value)throw Error('Preencha todos os campos.');
