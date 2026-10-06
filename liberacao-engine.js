@@ -4,11 +4,15 @@
  const months=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
  window.generateReleasePDF=async function(brand,values){
   if(!['crc','ideal'].includes(brand))throw Error('Selecione CRC ou IDEALLOG.');
+  const quantidade=String(values.quantidade||'').trim().toUpperCase();
+  const tipo=String(values.tipo||'').trim().toUpperCase();
+  if(!/^\d+X?$/.test(quantidade)||!/[1-9]/.test(quantidade))throw Error('Informe a quantidade, por exemplo 1X.');
+  if(!tipo)throw Error('Informe o tipo, por exemplo 40HC.');
   const [template,config,regular,bold,arial]=await Promise.all([get(brand+'.pdf'),get('fields.json',true),get('regular.ttf'),get('bold.ttf'),get('arial.ttf')]);
   const doc=await PDFLib.PDFDocument.load(template.slice(0),{updateMetadata:false});doc.registerFontkit(fontkit);
   const fonts={regular:await doc.embedFont(regular,{subset:true}),bold:await doc.embedFont(bold,{subset:true}),arial:await doc.embedFont(arial,{subset:true})};
   const [year,month,day]=values.data.split('-').map(Number);if(!year||!month||!day)throw Error('Informe a data da liberação.');
-  const data={...values,data:'Santos, '+day+' de '+months[month-1]+' de '+year,terminal:'À '+values.terminal.replace(/^À\s+/i,'').trim()};
+  const data={...values,quantidade:quantidade.replace(/X$/,'')+'X'+tipo,data:'Santos, '+day+' de '+months[month-1]+' de '+year,terminal:'À '+values.terminal.replace(/^À\s+/i,'').trim()};
   const page=doc.getPages()[0];
   for(const [key,field] of Object.entries(config[brand].fields)){
    const value=String(data[key]||'').trim().replace(/\s+/g,' ');if(!value)throw Error('Preencha todos os campos.');
