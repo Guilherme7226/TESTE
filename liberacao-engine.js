@@ -8,11 +8,13 @@
   const tipo=String(values.tipo||'').trim().toUpperCase();
   if(!/^\d+X?$/.test(quantidade)||!/[1-9]/.test(quantidade))throw Error('Informe a quantidade, por exemplo 1X.');
   if(!tipo)throw Error('Informe o tipo, por exemplo 40HC.');
-  const [template,config,regular,bold,arial]=await Promise.all([get(brand+'.pdf'),get('fields.json',true),get('regular.ttf'),get('bold.ttf'),get('arial.ttf')]);
-  const doc=await PDFLib.PDFDocument.load(template.slice(0),{updateMetadata:false});doc.registerFontkit(fontkit);
-  const fonts={regular:await doc.embedFont(regular,{subset:true}),bold:await doc.embedFont(bold,{subset:true}),arial:await doc.embedFont(arial,{subset:true})};
+  const [template,config]=await Promise.all([get(brand==='ideal'?'ideal-v2.pdf':'crc.pdf'),get('fields.json',true)]);
+  const doc=await PDFLib.PDFDocument.load(template.slice(0),{updateMetadata:false});
+  const regular=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  const fonts={regular,bold,arial:regular};
   const [year,month,day]=values.data.split('-').map(Number);if(!year||!month||!day)throw Error('Informe a data da liberação.');
-  const data={...values,quantidade:quantidade.replace(/X$/,'')+'X'+tipo,data:'Santos, '+day+' de '+months[month-1]+' de '+year,terminal:'À '+values.terminal.replace(/^À\s+/i,'').trim()};
+  const data={...values,quantidade:quantidade.replace(/X$/,'')+'X'+tipo,data:'Santos, '+day+' de '+months[month-1]+' de '+year,terminal:'A '+values.terminal.replace(/^[AÀ]\s+/i,'').trim().toUpperCase()};
   const page=doc.getPages()[0];
   for(const [key,field] of Object.entries(config[brand].fields)){
    const value=String(data[key]||'').trim().replace(/\s+/g,' ');if(!value)throw Error('Preencha todos os campos.');
@@ -21,6 +23,7 @@
    if(size<9)throw Error('O campo '+key+' está muito longo para o modelo. Abrevie o conteúdo.');
    page.drawText(text,{x:field.x,y:field.y,size,font,color:PDFLib.rgb(0,0,0)});
   }
+  if(brand==='ideal'&&values.supertestado==='on')page.drawText('SUPERTESTADO',{x:68.8,y:356.589,size:14,font:regular,color:PDFLib.rgb(0,0,0)});
   doc.setTitle('Liberação de vazios - '+(brand==='crc'?'CRC':'IDEALLOG'));doc.setSubject('Liberação de container');doc.setAuthor('');doc.setCreator('COSTALOG');
   return doc.save();
  };
